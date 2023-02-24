@@ -41,5 +41,5 @@ int getPlayerGuess() {
 void gameProcess(int guess, int secretNumber) {
 	if (guess < secretNumber) cout << "Your number is too small !\n";
 	else if (guess > secretNumber) cout << "Your number is too big !\n";
-	else cout << "Congratulation, you've won !";
+	else cout << "Congratulation, you've won !\n";
 }
