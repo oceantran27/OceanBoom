@@ -1,93 +1,80 @@
-#include "main.h"
+#include "BaseObject.h"
 
-int main(int argc, char* argv[]) 
+BaseObject g_background;
+
+bool Init()
 {
-	if (!init())
-	{		
-		printf("Failed to initialize!\n");
-	}
-	else
-	{
-		if (!loadMedia())
-		{
-			printf("Failed to load media!\n");
-		}
-		else
-		{
-			//SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
-			//SDL_UpdateWindowSurface(gWindow);
-			SDL_Event e; 
-			bool quit = false; 
-			while (quit == false) 
-			{ 
-				while (SDL_PollEvent(&e)) 
-				{ 
-					if (e.type == SDL_QUIT) quit = true; 
-				}
-				SDL_BlitSurface(gXOut, NULL, gScreenSurface, NULL);
-				SDL_UpdateWindowSurface(gWindow);
-			}
-		}
-	}
-	close();
-	return 0;
-}
+	if (SDL_INIT_VIDEO < 0) { return false; }
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-bool init()
-{
-
-	if (SDL_Init(SDL_INIT_VIDEO < 0))
-	{
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+	g_window = SDL_CreateWindow("Bomberman", 
+								SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+								SCREEN_WIDTH, SCREEN_HEIGHT, 
+								SDL_WINDOW_SHOWN);
+	if (g_window == NULL) 
 		return false;
-	}
-	else
-	{
-		gWindow = SDL_CreateWindow("Bomberman",
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			SCREEN_WIDTH, SCREEN_HEIGHT,
-			SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
-		{
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-			return false;
-		}
-		else
-		{
-			gScreenSurface = SDL_GetWindowSurface(gWindow);
-		}
-	}
+
+	g_screen = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+	if (g_screen == NULL)
+		return false;
+
+	SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
+
+	int imgFlags = IMG_INIT_PNG;
+	if (!(IMG_Init(imgFlags) & imgFlags)) 
+		return false;
+
 	return true;
 }
 
-bool loadMedia()
+bool LoadBackGround()
 {
-	gXOut = SDL_LoadBMP("x.bmp");
-	if (gXOut == NULL)
-	{
-		printf("Unable to load image %s! SDL Error: %s\n", "x.bmp", SDL_GetError());
+	bool load_bckground = g_background.LoadImg("background_Play.png", g_screen);
+	if (load_bckground == NULL) 
 		return false;
-	}
+
 	return true;
 }
 
-void close()
+void Close()
 {
-	SDL_FreeSurface(gXOut);
-	gXOut = NULL;
-	
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
+	g_background.Free();
 
+	SDL_DestroyRenderer(g_screen);
+	g_screen = NULL;
+
+	SDL_DestroyWindow(g_window);
+	g_window = NULL;
+
+	IMG_Quit();
 	SDL_Quit();
 }
 
-SDL_Surface* loadSurface(std::string path)
+int main(int argc, char* argv[])
 {
-	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
-	if (loadedSurface == NULL)
+	if (!Init())
+		return -1;
+
+	if (!LoadBackGround())
+		return -1;
+
+	bool quit = false;
+	while (!quit)
 	{
-		printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+		while (SDL_PollEvent (&g_event))
+		{
+			if (g_event.type == SDL_QUIT)
+				quit = true; 
+		}
+		SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
+		SDL_RenderClear(g_screen);
+
+		g_background.Render(g_screen, NULL);
+
+		SDL_RenderPresent(g_screen);
 	}
-	return loadedSurface;
+
+	return 0;
 }
+
+
