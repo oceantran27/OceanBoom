@@ -1,6 +1,7 @@
 #include "BaseObject.h"
+#include "Game_map.h"
 
-BaseObject g_background;
+//BaseObject g_background;
 
 bool Init()
 {
@@ -27,18 +28,18 @@ bool Init()
 	return true;
 }
 
-bool LoadBackGround()
-{
-	bool load_bckground = g_background.LoadImg("background_Play.png", g_screen);
-	if (load_bckground == NULL) 
-		return false;
-
-	return true;
-}
+//bool LoadBackGround()
+//{
+//	bool load_bckground = g_background.LoadImg("background_Play.png", g_screen);
+//	if (load_bckground == NULL) 
+//		return false;
+//
+//	return true;
+//}
 
 void Close()
 {
-	g_background.Free();
+	/*g_background.Free();*/
 
 	SDL_DestroyRenderer(g_screen);
 	g_screen = NULL;
@@ -55,8 +56,12 @@ int main(int argc, char* argv[])
 	if (!Init())
 		return -1;
 
-	if (!LoadBackGround())
-		return -1;
+	//if (!LoadBackGround())
+	//	return -1;
+
+	GameMap game_map;
+	game_map.LoadMap("Images/map.txt");
+	game_map.LoadTiles(g_screen);
 
 	bool quit = false;
 	while (!quit)
@@ -69,8 +74,8 @@ int main(int argc, char* argv[])
 		SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
 		SDL_RenderClear(g_screen);
 
-		g_background.Render(g_screen, NULL);
-
+		game_map.DrawMap(g_screen);
+		//g_background.Render(g_screen, NULL);
 		SDL_RenderPresent(g_screen);
 	}
 

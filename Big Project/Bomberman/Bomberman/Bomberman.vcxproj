@@ -22,10 +22,12 @@
     <ClCompile Include="BaseObject.cpp" />
     <ClCompile Include="CommonFunc.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Game_map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseObject.h" />
     <ClInclude Include="CommonFunc.h" />
+    <ClInclude Include="Game_map.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -117,6 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <UndefinePreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

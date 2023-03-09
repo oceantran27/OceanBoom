@@ -5,7 +5,7 @@ int d[100000];
 string s;
 int len;
 
-void check(int n) {
+void print(int n) {
 	for (int i = 0; i < n; i++) {
 		cout << s[d[i]];
 	}
@@ -14,9 +14,9 @@ void check(int n) {
 
 void dq(int k) {
 	if (k >= 3) {
-		check(k);
+		print(k);
 	} else {
-		if (k == 2) check(k);
+		if (k == 2) print(k);
 		for (int i = 0; i < len; i++) {
 			d[k] = i;
 			dq(k+1);

@@ -24,12 +24,18 @@
     <ClCompile Include="BaseObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Game_map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonFunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
