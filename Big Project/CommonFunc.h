@@ -25,6 +25,14 @@ const int COLOR_KEY_B = 255;
 #define MAX_MAP_X 15
 #define MAX_MAP_Y 13
 
+struct Input
+{
+	int left_;
+	int right_;
+	int up_;
+	int down_;
+};
+
 struct Map
 {
 	int start_x_;

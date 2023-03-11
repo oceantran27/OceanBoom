@@ -6,7 +6,7 @@ void GameMap::LoadMap(const char* name)
 	fopen_s(&fp, name, "rb");
 
 	if (fp == NULL)
-	{
+	{	
 		return;
 	}
 

@@ -1,7 +1,6 @@
 #include "BaseObject.h"
 #include "Game_map.h"
-
-//BaseObject g_background;
+#include "MainObject.h"
 
 bool Init()
 {
@@ -28,18 +27,8 @@ bool Init()
 	return true;
 }
 
-//bool LoadBackGround()
-//{
-//	bool load_bckground = g_background.LoadImg("background_Play.png", g_screen);
-//	if (load_bckground == NULL) 
-//		return false;
-//
-//	return true;
-//}
-
 void Close()
 {
-	/*g_background.Free();*/
 
 	SDL_DestroyRenderer(g_screen);
 	g_screen = NULL;
@@ -56,12 +45,15 @@ int main(int argc, char* argv[])
 	if (!Init())
 		return -1;
 
-	//if (!LoadBackGround())
-	//	return -1;
-
 	GameMap game_map;
-	game_map.LoadMap("Images/map.txt");
+	game_map.LoadMap("Map/Level 1.txt");
 	game_map.LoadTiles(g_screen);
+
+	MainObject p_player;
+	p_player.MO_LoadImg("Images/down.png", g_screen);
+	p_player.Set_Clip();
+
+	Map g_map_data = game_map.getMap();
 
 	bool quit = false;
 	while (!quit)
@@ -70,12 +62,16 @@ int main(int argc, char* argv[])
 		{
 			if (g_event.type == SDL_QUIT)
 				quit = true; 
+			p_player.HandleInputAction(g_event);
 		}
+
 		SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
 		SDL_RenderClear(g_screen);
 
 		game_map.DrawMap(g_screen);
-		//g_background.Render(g_screen, NULL);
+		p_player.Show(g_screen);
+		p_player.HandleMove(g_map_data);
+
 		SDL_RenderPresent(g_screen);
 	}
 
