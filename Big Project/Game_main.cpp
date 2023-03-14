@@ -1,10 +1,11 @@
 #include "BaseObject.h"
 #include "Game_map.h"
 #include "MainObject.h"
+#include "ImpTimer.h"
 
 bool Init()
 {
-	if (SDL_INIT_VIDEO < 0) { return false; }
+	if (SDL_INIT_EVERYTHING < 0) { return false; }
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
 	g_window = SDL_CreateWindow("Bomberman", 
@@ -42,27 +43,29 @@ void Close()
 
 int main(int argc, char* argv[])
 {
+	ImpTimer fps_timer;
+
 	if (!Init())
 		return -1;
 
 	GameMap game_map;
-	game_map.LoadMap("Map/Level 1.txt");
+	game_map.LoadMap("Map/Level 0.txt");
 	game_map.LoadTiles(g_screen);
+	Map g_map_data = game_map.getMap();
 
 	MainObject p_player;
 	p_player.MO_LoadImg("Images/down.png", g_screen);
 	p_player.Set_Clip();
 
-	Map g_map_data = game_map.getMap();
-
 	bool quit = false;
 	while (!quit)
 	{
+		fps_timer.start();
 		while (SDL_PollEvent (&g_event))
 		{
 			if (g_event.type == SDL_QUIT)
 				quit = true; 
-			p_player.HandleInputAction(g_event);
+			p_player.HandleInputAction(g_event, g_screen);
 		}
 
 		SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
@@ -73,8 +76,25 @@ int main(int argc, char* argv[])
 		p_player.HandleMove(g_map_data);
 
 		SDL_RenderPresent(g_screen);
+		for (int i = 0; i < p_player.get_bom_list().size(); i++)
+		{
+			std::vector<Bomb*> bomb_list = p_player.get_bom_list();
+			Bomb* p_bomb = bomb_list.at(i);
+			p_bomb->Draw(g_screen);
+		}
+
+		int real_imp_time = fps_timer.get_ticks();
+		int time_one_frame = 1000 / FRAME_PER_SECOND;
+
+		if (real_imp_time < time_one_frame)
+		{
+			int delay_time = time_one_frame - real_imp_time;
+			if(delay_time >= 0)
+				SDL_Delay(delay_time);
+		}
 	}
 
+	Close();
 	return 0;
 }
 

@@ -3,6 +3,9 @@
 #define MAIN_OBJECT_H
 
 #include "BaseObject.h"
+#include "CommonFunc.h"
+#include "Bomb.h"
+#include <vector>
 
 class MainObject : public BaseObject
 {
@@ -20,12 +23,23 @@ public:
 
 	bool MO_LoadImg(std::string path, SDL_Renderer* screen);
 	void Show(SDL_Renderer* des);
-	void HandleInputAction(SDL_Event &events);
+	void HandleInputAction(SDL_Event &events, SDL_Renderer* screen);
 	void Set_Clip();
 	void HandleMove(Map& map_data);
 	void CheckToMap(Map& map_data);
 
+//	SDL_TimerCallback BombTimerCallBack();
+//	void UnlockBombPlacement() { can_place_bomb = true; }
+	void set_bomb_list(std::vector<Bomb*> bomb_list)
+	{
+		p_bomb_list_ = bomb_list;
+	}
+
+	std::vector<Bomb*> get_bom_list() const { return p_bomb_list_; }
 private:
+	/*bool can_place_bomb;*/
+	std::vector<Bomb*> p_bomb_list_;
+
 	float x_val_;
 	float y_val_;
 

@@ -1,7 +1,8 @@
 #include "MainObject.h"
+#include "Bomb.h"
 
 #define BLANK_TILE 0
-#define PLAYER_SPEED 0.3
+#define PLAYER_SPEED 4.5
 
 
 MainObject::MainObject()
@@ -33,7 +34,7 @@ bool MainObject::MO_LoadImg(std::string path, SDL_Renderer* screen)
 		return false;
 	}
 
-	width_frame_ = rect_.w / 4;
+	width_frame_ = rect_.w / 3;
 	height_frame_ = rect_.h;
 }
 
@@ -41,7 +42,7 @@ void MainObject::Set_Clip()
 {
 	if (width_frame_ > 0 && height_frame_ > 0)
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			frame_clip_[i].x = i*width_frame_;
 			frame_clip_[i].y = 0;
@@ -55,19 +56,19 @@ void MainObject::Show(SDL_Renderer* des)
 {
 	if (status_ == WALK_LEFT)
 	{
-		LoadImg("Images/left.png", des);
+		MO_LoadImg("Images/left.png", des);
 	}
 	else if (status_ == WALK_RIGHT)
 	{
-		LoadImg("Images/right.png", des);
+		MO_LoadImg("Images/right.png", des);
 	}
 	else if (status_ == WALK_UP)
 	{
-		LoadImg("Images/up.png", des);
+		MO_LoadImg("Images/up.png", des);
 	}
 	else if (status_ == WALK_DOWN)
 	{
-		LoadImg("Images/down.png", des);
+		MO_LoadImg("Images/down.png", des);
 	}
 
 	if (input_type_.left_ == 1 ||
@@ -82,7 +83,7 @@ void MainObject::Show(SDL_Renderer* des)
 		frame_ = 0;
 	}
 
-	if (frame_ >= 4)
+	if (frame_ >= 3)
 		frame_ = 0;
 
 	rect_.x = x_pos_;
@@ -93,7 +94,7 @@ void MainObject::Show(SDL_Renderer* des)
 	SDL_RenderCopy(des, p_object_, current_clip, &renderQuad);
 }
 
-void MainObject::HandleInputAction(SDL_Event &event)
+void MainObject::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 {
 	if (event.type == SDL_KEYDOWN)
 	{
@@ -136,8 +137,24 @@ void MainObject::HandleInputAction(SDL_Event &event)
 			input_type_.right_ = 0;
 			input_type_.up_ = 0;
 			input_type_.down_ = 1;
+
+			Bomb* mBomb = new Bomb();
+			mBomb->LoadImg("Images/bomb.png", screen);
+			mBomb->SetRect((x_pos_ / TILE_SIZE) * TILE_SIZE, (y_pos_ / TILE_SIZE) * TILE_SIZE);
+			mBomb->PlaceBomb(screen);
+			p_bomb_list_.push_back(mBomb);
 		}
 		break;
+
+		//case SDLK_SPACE:
+		//{
+		//	Bomb* mBomb = new Bomb();
+		//	mBomb->LoadImg("Images/bomb.png", screen);
+		//	mBomb->SetRect((x_pos_ / TILE_SIZE) * TILE_SIZE, (y_pos_ / TILE_SIZE) * TILE_SIZE);
+		//	mBomb->PlaceBomb(screen);
+		//	p_bomb_list_.push_back(mBomb);
+		//}
+		//break;
 		}
 	}
 
@@ -170,7 +187,12 @@ void MainObject::HandleInputAction(SDL_Event &event)
 		break;
 		}
 	}
-
+	//Bomb* mBomb = new Bomb();
+	//mBomb->LoadImg("Images/bomb.png", screen);
+	///*mBomb->SetWidthHeight(48, 48);*/
+	//mBomb->SetRect((x_pos_ / TILE_SIZE) * TILE_SIZE, (y_pos_ / TILE_SIZE) * TILE_SIZE);
+	//mBomb->PlaceBomb(screen);
+	//p_bomb_list_.push_back(mBomb);
 }
 
 void MainObject::HandleMove(Map& map_data)
@@ -204,11 +226,11 @@ void MainObject::CheckToMap(Map& map_data)
 	int x1, x2;
 	int y1, y2;
 
-	x1 = x_pos_ / TILE_SIZE;
-	x2 = (x_pos_ + width_frame_ - 1) / TILE_SIZE;
+	x1 = (x_pos_ + 5) / TILE_SIZE;
+	x2 = (x_pos_ + width_frame_ - 5) / TILE_SIZE;
 
-	y1 = y_pos_ / TILE_SIZE;
-	y2 = (y_pos_ + height_frame_ - 1) / TILE_SIZE;
+	y1 = (y_pos_ + 5) / TILE_SIZE;
+	y2 = (y_pos_ + height_frame_ - 5) / TILE_SIZE;
 
 
 	if (x_pos_ < TILE_SIZE || x_pos_ + width_frame_ + TILE_SIZE > map_data.max_x_)
