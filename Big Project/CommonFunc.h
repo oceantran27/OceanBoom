@@ -3,15 +3,15 @@
 #define COMMON_FUNCTION_H
 
 #include <Windows.h>
-#include <iostream>
-#include <string>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <iostream>
+#include <string>
 
 
-static SDL_Window* g_window = NULL;
-static SDL_Renderer* g_screen = NULL;
-static SDL_Event g_event;
+static SDL_Window* gWindow = NULL;
+static SDL_Renderer* gScreen = NULL;
+static SDL_Event gEvent;
 
 const int FRAME_PER_SECOND = 24;
 const int SCREEN_WIDTH = 52*15;
@@ -28,24 +28,22 @@ const int COLOR_KEY_B = 255;
 
 struct Input
 {
-	int left_;
-	int right_;
-	int up_;
-	int down_;
+	int mLeft;
+	int mRight;
+	int mUp;
+	int mDown;
 };
 
 struct Map
 {
-	int start_x_;
-	int start_y_;
+	int mStart_x;
+	int mStart_y;
 
-	int max_x_;
-	int max_y_;
+	int mMax_x;
+	int mMax_y;
 
-	int tile[MAX_MAP_Y][MAX_MAP_X];
-	//char* file_name_;
+	int mTileMap[MAX_MAP_Y][MAX_MAP_X];
 };
-
 
 #endif // !COMMON_FUNCTION_H
 

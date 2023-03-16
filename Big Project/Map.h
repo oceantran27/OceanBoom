@@ -1,7 +1,8 @@
 #pragma once
-#ifndef GAME_MAP_H
-#define GAME_MAP_H
+#ifndef MAP_H
+#define MAP_H
 
+#include "CommonFunc.h"
 #include "BaseObject.h"
 
 #define MAX_TILES 5
@@ -22,11 +23,11 @@ public:
 	void LoadMap(const char* name);
 	void LoadTiles(SDL_Renderer* screen);
 	void DrawMap(SDL_Renderer* screen);
-	Map getMap() const { return game_map_; }
+	Map GetMap() const { return mMap; }
 
 private:
-	Map game_map_;
-	TileMat tile_mat[MAX_TILES];
+	Map mMap;
+	TileMat mTiles[MAX_TILES];
 };
 
-#endif // !GAME_MAP_H
+#endif // !MAP_H
