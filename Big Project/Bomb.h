@@ -4,6 +4,7 @@
 
 #include "CommonFunc.h"
 #include "BaseObject.h"
+#include "Bomber.h"
 
 #define TIME_BOMB_EXPLODE 2000
 
@@ -13,14 +14,16 @@ public:
 	Bomb();
 	~Bomb();
 	
-	void Update(float deltaTime);
-	bool PlaceBomb();
-	void Explode();
-	bool IsWaitingToExplode() const;
+	void plant();
+	void explode();
+	bool is_active() const { return m_timer_id != 0; }
 
 private:
-	float mTimer;
-	bool mWaitingToExplode;
+	static Uint32 timer_callback(Uint32 interval, void* param);
+	void start_timer();
+	void stop_timer();
+
+	SDL_TimerID m_timer_id;
 };
 
 #endif // !BOMB_H

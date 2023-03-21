@@ -2,23 +2,27 @@
 
 #define BLANK_TILE 0
 #define PLAYER_SPEED 4
-#define ERROR_NUM 4
 
 
 Bomber::Bomber()
 {
-	mFrame = 0;
-	m_xPos = 52;
-	m_yPos = 52;
-	mVal_x = 0;
-	mVal_y = 0;
-	mWidthFrame = 0;
-	mHeightFrame = 0;
-	mStatus = -1;
-	mInputType.mLeft = 0;
-	mInputType.mRight = 0;
-	mInputType.mUp = 0;
-	mInputType.mDown = 0;
+	frame = 0;
+
+	x_pos = 52;
+	y_pos = 52;
+
+	x_val = 0;
+	y_val = 0;
+
+	width_frame = 0;
+	height_frame = 0;
+
+	status = -1;
+	input_type.left = 0;
+	input_type.right = 0;
+	input_type.up = 0;
+	input_type.down = 0;
+
 }
 
 Bomber::~Bomber()
@@ -34,65 +38,65 @@ bool Bomber::LoadClipImg(std::string path, SDL_Renderer* screen)
 		return false;
 	}
 
-	mWidthFrame = mRect.w / 3;
-	mHeightFrame = mRect.h;
+	width_frame = rect.w / 3;
+	height_frame = rect.h;
 
 	return true;
 }
 
 void Bomber::SetClip()
 {
-	if (mWidthFrame > 0 && mHeightFrame > 0)
+	if (width_frame > 0 && height_frame > 0)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			mFrameClip[i].x = i*mWidthFrame;
-			mFrameClip[i].y = 0;
-			mFrameClip[i].w = mWidthFrame;
-			mFrameClip[i].h = mHeightFrame;
+			frame_clip[i].x = i*width_frame;
+			frame_clip[i].y = 0;
+			frame_clip[i].w = width_frame;
+			frame_clip[i].h = height_frame;
 		}
 	}
 }
 
 void Bomber::BomberShow(SDL_Renderer* des)
 {
-	if (mStatus == WALK_LEFT)
+	if (status == WALK_LEFT)
 	{
 		LoadClipImg("Images/left.png", des);
 	}
-	else if (mStatus == WALK_RIGHT)
+	else if (status == WALK_RIGHT)
 	{
 		LoadClipImg("Images/right.png", des);
 	}
-	else if (mStatus == WALK_UP)
+	else if (status == WALK_UP)
 	{
 		LoadClipImg("Images/up.png", des);
 	}
-	else if (mStatus == WALK_DOWN)
+	else if (status == WALK_DOWN)
 	{
 		LoadClipImg("Images/down.png", des);
 	}
 
-	if (mInputType.mLeft == 1 ||
-		mInputType.mRight == 1 ||
-		mInputType.mUp == 1 ||
-		mInputType.mDown == 1)
+	if (input_type.left == 1 ||
+		input_type.right == 1 ||
+		input_type.up == 1 ||
+		input_type.down == 1)
 	{
-		mFrame++;
+		frame++;
 	}
 	else
 	{
-		mFrame = 0;
+		frame = 0;
 	}
 
-	if (mFrame >= 3)
-		mFrame = 0;
+	if (frame >= 3)
+		frame = 0;
 
-	mRect.x = m_xPos;
-	mRect.y = m_yPos;
+	rect.x = x_pos;
+	rect.y = y_pos;
 
-	SDL_Rect* current_clip = &mFrameClip[mFrame];
-	SDL_Rect renderQuad = { mRect.x, mRect.y, mWidthFrame, mHeightFrame };
+	SDL_Rect* current_clip = &frame_clip[frame];
+	SDL_Rect renderQuad = { rect.x, rect.y, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
 }
 
@@ -104,53 +108,54 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 		{
 		case SDLK_LEFT:
 		{
-			mStatus = WALK_LEFT;
-			mInputType.mLeft = 1;
-			mInputType.mRight = 0;
-			mInputType.mUp = 0;
-			mInputType.mDown = 0;
+			status = WALK_LEFT;
+			input_type.left = 1;
+			input_type.right = 0;
+			input_type.up = 0;
+			input_type.down = 0;
 		}
 		break;
 
 		case SDLK_RIGHT:
 		{
-			mStatus = WALK_RIGHT;
-			mInputType.mLeft = 0;
-			mInputType.mRight = 1;
-			mInputType.mUp = 0;
-			mInputType.mDown = 0;
+			status = WALK_RIGHT;
+			input_type.left = 0;
+			input_type.right = 1;
+			input_type.up = 0;
+			input_type.down = 0;
 		}
 		break;
 
 		case SDLK_UP:
 		{
-			mStatus = WALK_UP;
-			mInputType.mLeft = 0;
-			mInputType.mRight = 0;
-			mInputType.mUp = 1;
-			mInputType.mDown = 0;
+			status = WALK_UP;
+			input_type.left = 0;
+			input_type.right = 0;
+			input_type.up = 1;
+			input_type.down = 0;
 		}
 		break;
 
 		case SDLK_DOWN:
 		{
-			mStatus = WALK_DOWN;
-			mInputType.mLeft = 0;
-			mInputType.mRight = 0;
-			mInputType.mUp = 0;
-			mInputType.mDown = 1;
+			status = WALK_DOWN;
+			input_type.left = 0;
+			input_type.right = 0;
+			input_type.up = 0;
+			input_type.down = 1;
 
 		}
 		break;
 
 		case SDLK_SPACE:
 		{
-			Bomb* mBomb = new Bomb();
-			mBomb->LoadImg("Images/bomb.png", screen);
-			int tmp_x = (int)(m_xPos + ERROR_NUM) / TILE_SIZE;
-			int tmp_y = (int)(m_yPos + ERROR_NUM) / TILE_SIZE;
-			mBomb->SetRect(tmp_x*TILE_SIZE, tmp_y*TILE_SIZE);
-			pBombList.push_back(mBomb);
+			Bomb* pbomb = new Bomb();
+				pbomb->plant();
+				int tmp_x = (int)(x_pos + ERROR_NUM) / TILE_SIZE;
+				int tmp_y = (int)(y_pos + ERROR_NUM) / TILE_SIZE;
+				pbomb->LoadImg("Images/bomb.png", screen);
+				pbomb->SetRect(tmp_x * TILE_SIZE + ERROR_NUM, tmp_y * TILE_SIZE + ERROR_NUM);
+				pbomb_list.push_back(pbomb);
 		}
 		break;
 		}
@@ -162,25 +167,25 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 		{
 		case SDLK_LEFT:
 		{
-			mInputType.mLeft = 0;
+			input_type.left = 0;
 		}
 		break;
 
 		case SDLK_RIGHT:
 		{
-			mInputType.mRight = 0;
+			input_type.right = 0;
 		}
 		break;
 
 		case SDLK_UP:
 		{
-			mInputType.mUp = 0;
+			input_type.up = 0;
 		}
 		break;
 
 		case SDLK_DOWN:
 		{
-			mInputType.mDown = 0;
+			input_type.down = 0;
 		}
 		break;
 		}
@@ -188,92 +193,99 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 
 }
 
-void Bomber::HandleMove(Map& mapData)
+void Bomber::BombShow(SDL_Renderer* des)
 {
-	mVal_x = 0;
-	mVal_y = 0;
-	if (mInputType.mLeft == 1)
+	for (auto pbomb : pbomb_list)
 	{
-		mVal_x -= PLAYER_SPEED;
+		if (pbomb != NULL)
+		{
+
+		}
 	}
-	else if (mInputType.mRight == 1)
+}
+void Bomber::HandleMove(Map& map_data)
+{
+	x_val = 0;
+	y_val = 0;
+	if (input_type.left == 1)
 	{
-		mVal_x += PLAYER_SPEED;
+		x_val -= PLAYER_SPEED;
 	}
-	else if (mInputType.mUp == 1)
+	else if (input_type.right == 1)
 	{
-		mVal_y -= PLAYER_SPEED;
+		x_val += PLAYER_SPEED;
 	}
-	else if (mInputType.mDown == 1)
+	else if (input_type.up == 1)
 	{
-		mVal_y += PLAYER_SPEED;
+		y_val -= PLAYER_SPEED;
 	}
-	CheckToMap(mapData);
+	else if (input_type.down == 1)
+	{
+		y_val += PLAYER_SPEED;
+	}
+	CheckToMap(map_data);
 }
 
-void Bomber::CheckToMap(Map& mapData)
+void Bomber::CheckToMap(Map& map_data)
 {
-	m_xPos += mVal_x;
-	m_yPos += mVal_y;
+	x_pos += x_val;
+	y_pos += y_val;
 
 	int x1, x2;
 	int y1, y2;
 
-	x1 = (m_xPos + ERROR_NUM) / TILE_SIZE;
-	x2 = (m_xPos + mWidthFrame - ERROR_NUM) / TILE_SIZE;
+	x1 = (x_pos + ERROR_NUM) / TILE_SIZE;
+	x2 = (x_pos + width_frame - ERROR_NUM) / TILE_SIZE;
 
-	y1 = (m_yPos + ERROR_NUM) / TILE_SIZE;
-	y2 = (m_yPos + mHeightFrame - ERROR_NUM) / TILE_SIZE;
+	y1 = (y_pos + ERROR_NUM) / TILE_SIZE;
+	y2 = (y_pos + height_frame - ERROR_NUM) / TILE_SIZE;
 
 
-	if (m_xPos < TILE_SIZE || m_xPos + mWidthFrame + TILE_SIZE > mapData.mMax_x)
+	if (x_pos < TILE_SIZE || x_pos + width_frame + TILE_SIZE > map_data.max_x)
 	{
-		m_xPos -= mVal_x;
+		x_pos -= x_val;
 	}
-	if (m_yPos < TILE_SIZE || m_yPos + mHeightFrame + TILE_SIZE > mapData.mMax_y)
+	if (y_pos < TILE_SIZE || y_pos + height_frame + TILE_SIZE > map_data.max_y)
 	{
-		m_yPos -= mVal_y;
+		y_pos -= y_val;
 	}
 
-	if (mVal_x > 0)
+	int top_right = map_data.tile_map[y1][x2];
+	int bot_right = map_data.tile_map[y2][x2];
+	int top_left = map_data.tile_map[y1][x1];
+	int bot_left = map_data.tile_map[y2][x1];
+
+	if (x_val > 0)
 	{
-		if (mapData.mTileMap[y1][x2] != BLANK_TILE || mapData.mTileMap[y2][x2] != BLANK_TILE)
+		if (top_right != BLANK_TILE || bot_right != BLANK_TILE)
 		{
-			m_xPos = x2 * TILE_SIZE - mWidthFrame - ERROR_NUM;
-			mVal_x = 0;
+			x_pos = x2 * TILE_SIZE - width_frame - ERROR_NUM;
+			x_val = 0;
 		}
 	}
-	else if (mVal_x < 0)
+	else if (x_val < 0)
 	{
-		if (mapData.mTileMap[y1][x1] != BLANK_TILE || mapData.mTileMap[y2][x1] != BLANK_TILE)
+		if (top_left != BLANK_TILE || bot_left != BLANK_TILE)
 		{
-			m_xPos = (x1 + 1) * TILE_SIZE;
-			mVal_x = 0;
+			x_pos = (x1 + 1) * TILE_SIZE;
+			x_val = 0;
 		}
 	}
 
-	if (mVal_y > 0)
+	if (y_val > 0)
 	{
-		if (mapData.mTileMap[y2][x1] != BLANK_TILE || mapData.mTileMap[y2][x2] != BLANK_TILE)
+		if (bot_right != BLANK_TILE || bot_left != BLANK_TILE)
 		{
-			m_yPos = y2 * TILE_SIZE - mHeightFrame - ERROR_NUM;
-			mVal_y = 0;
+			y_pos = y2 * TILE_SIZE - height_frame - ERROR_NUM;
+			y_val = 0;
 		}
 	}
-	else if (mVal_y < 0)
+	else if (y_val < 0)
 	{
-		if (mapData.mTileMap[y1][x1] != BLANK_TILE || mapData.mTileMap[y1][x2] != BLANK_TILE)
+		if (top_right != BLANK_TILE || top_left != BLANK_TILE)
 		{
-			m_yPos = (y1 + 1) * TILE_SIZE;
-			mVal_y = 0;
+			y_pos = (y1 + 1) * TILE_SIZE;
+			y_val = 0;
 		}
-	}
-}
-
-void Bomber::BombShow(SDL_Renderer* des)
-{
-	for (auto mBomb : pBombList)
-	{
-		mBomb->Render(des);
 	}
 }

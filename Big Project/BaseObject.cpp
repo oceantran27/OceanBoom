@@ -3,10 +3,10 @@
 BaseObject::BaseObject()
 {
 	pObject = NULL;
-	mRect.x = 0;
-	mRect.y = 0;
-	mRect.w = 0;
-	mRect.h = 0;
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 0;
+	rect.h = 0;
 }
 
 BaseObject::~BaseObject()
@@ -27,8 +27,8 @@ bool BaseObject::LoadImg(std::string path, SDL_Renderer* screen)
 	if (new_texture == NULL) 
 		return false;
 
-	mRect.w = load_surface->w;
-	mRect.h = load_surface->h;
+	rect.w = load_surface->w;
+	rect.h = load_surface->h;
 
 	SDL_FreeSurface(load_surface);
 
@@ -41,7 +41,7 @@ bool BaseObject::LoadImg(std::string path, SDL_Renderer* screen)
 
 void BaseObject::Render(SDL_Renderer* des, const SDL_Rect* clip)
 {
-	SDL_Rect renderquad = { mRect.x, mRect.y, mRect.w, mRect.h };
+	SDL_Rect renderquad = { rect.x, rect.y, rect.w, rect.h };
 
 	SDL_RenderCopy(des, pObject, clip, &renderquad);
 }
@@ -52,8 +52,8 @@ void BaseObject::Free()
 	{
 		SDL_DestroyTexture(pObject);
 		pObject = NULL;
-		mRect.w = 0;
-		mRect.h = 0;
+		rect.w = 0;
+		rect.h = 0;
 
 	}
 }

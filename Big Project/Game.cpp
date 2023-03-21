@@ -1,13 +1,13 @@
 #include "CommonFunc.h"
 #include "BaseObject.h"
 #include "Map.h"
+#include "Bomb.h"
 #include "Bomber.h"
 #include "Timer.h"
-#include "Bomb.h"
 
 bool Init()
 {
-	if (SDL_INIT_EVERYTHING < 0) { return false; }
+	if (SDL_INIT_VIDEO < 0) { return false; }
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
 	gWindow = SDL_CreateWindow("Bomberman", 
@@ -55,9 +55,11 @@ int main(int argc, char* argv[])
 	gameMap.LoadTiles(gScreen);
 	Map gTileMap = gameMap.GetMap();
 
-	Bomber pPlayer;
+	Bomber* pPlayer;
 	pPlayer.LoadClipImg("Images/down.png", gScreen);
 	pPlayer.SetClip();
+
+	Bomb* pBomb;
 
 
 	bool quit = false;

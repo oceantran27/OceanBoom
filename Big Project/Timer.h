@@ -20,11 +20,11 @@ public:
 	bool IsStarted();
 
 private:
-	int mStartTick;
-	int mPausedTick;
+	int start_tick;
+	int paused_tick;
 
-	bool mIsStarted;
-	bool mIsPaused;
+	bool is_started;
+	bool is_paused;
 };
 
 

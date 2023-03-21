@@ -5,7 +5,10 @@
 #include "BaseObject.h"
 #include "CommonFunc.h"
 #include "Bomb.h"
-#include <vector>
+
+#define ERROR_NUM 2
+
+class Bomb;
 
 class Bomber : public BaseObject
 {
@@ -25,32 +28,26 @@ public:
 	void BomberShow(SDL_Renderer* des);
 	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen);
 	void SetClip();
-	void HandleMove(Map& mapData);
-	void CheckToMap(Map& mapData);
+	void HandleMove(Map& map_data);
+	void CheckToMap(Map& map_data);
+	void GetBombList(std::vector<Bomb*> bomb_list);
 	void BombShow(SDL_Renderer* des);
-	void SetBombList(std::vector<Bomb*> bombList)
-	{
-		pBombList = bombList;
-	}
-
-	std::vector<Bomb*> GetBombList() const { return pBombList; }
-
 private:
-	std::vector<Bomb*> pBombList;
+	std::vector<Bomb*> pbomb_list;
+	float x_val;
+	float y_val;
 
-	float mVal_x;
-	float mVal_y;
+	float x_pos;
+	float y_pos;
 
-	float m_xPos;
-	float m_yPos;
+	int frame;
+	int width_frame;
+	int height_frame;
 
-	int mWidthFrame;
-	int mHeightFrame;
+	SDL_Rect frame_clip[4];
+	Input input_type;
+	int status;
 
-	SDL_Rect mFrameClip[4];
-	Input mInputType;
-	int mFrame;
-	int mStatus;
 };
  
 #endif // !MAIN_OBJECT_H

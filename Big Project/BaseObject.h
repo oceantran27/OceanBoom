@@ -9,8 +9,8 @@ class BaseObject
 public:
 	BaseObject();
 	~BaseObject();
-	void SetRect(const int& x, const int& y) { mRect.x = x; mRect.y = y; }
-	SDL_Rect GetRect() const { return mRect; }
+	void SetRect(const int& x, const int& y) { rect.x = x; rect.y = y; }
+	SDL_Rect GetRect() const { return rect; }
 	SDL_Texture* GetObject() const{ return pObject; }
 
 	bool LoadImg(std::string path, SDL_Renderer* screen);
@@ -19,7 +19,7 @@ public:
 
 protected:
 	SDL_Texture* pObject;
-	SDL_Rect mRect;
+	SDL_Rect rect;
 };
 
 #endif // !BASE_OBJECT_H

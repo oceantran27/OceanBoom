@@ -2,10 +2,10 @@
 
 #define EXPLOSION_TIME 2000
 
+
 Bomb::Bomb()
 {
-	mTimer = -1;
-	mWaitingToExplode = false;
+	m_timer_id = 0;
 }
 
 Bomb::~Bomb()
@@ -13,33 +13,31 @@ Bomb::~Bomb()
 	//
 }
 
-void Bomb::Update(float deltaTime)
-{
-	//if (mWaitingToExplode)
-	//{
-		mTimer += deltaTime;
 
-		if (mTimer > EXPLOSION_TIME)
-		{
-			Explode();
-		}
-	//}
+void Bomb::plant() {
+    if (!is_active()) {
+        start_timer();
+    }
 }
 
-void Bomb::Explode()
-{
-	//
-	mWaitingToExplode = false;
+void Bomb::explode() {
+    stop_timer();
+    printf("Bom exploded!\n");
 }
 
-bool Bomb::PlaceBomb()
-{
-	if (mWaitingToExplode) {
-		return false;
-	}
-
-	mWaitingToExplode = true;
-	mTimer = 0.0f;
-	return true;
+Uint32 Bomb::timer_callback(Uint32 interval, void* param) {
+    Bomb* bom = static_cast<Bomb*>(param);
+    bom->explode();
+    return 0;
 }
+
+void Bomb::start_timer() {
+    m_timer_id = SDL_AddTimer(2000, timer_callback, this);
+}
+
+void Bomb::stop_timer() {
+    SDL_RemoveTimer(m_timer_id);
+    m_timer_id = 0;
+}
+
 

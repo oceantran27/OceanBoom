@@ -23,11 +23,11 @@ public:
 	void LoadMap(const char* name);
 	void LoadTiles(SDL_Renderer* screen);
 	void DrawMap(SDL_Renderer* screen);
-	Map GetMap() const { return mMap; }
+	Map GetMap() const { return map_; }
 
 private:
-	Map mMap;
-	TileMat mTiles[MAX_TILES];
+	Map map_;
+	TileMat tiles[MAX_TILES];
 };
 
 #endif // !MAP_H

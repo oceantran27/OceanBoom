@@ -2,10 +2,10 @@
 
 Timer::Timer()
 {
-	mStartTick = 0;
-	mPausedTick = 0;
-	mIsPaused = false;
-	mIsStarted = false;
+	start_tick = 0;
+	paused_tick = 0;
+	is_paused = false;
+	is_started = false;
 }
 
 Timer::~Timer()
@@ -15,38 +15,38 @@ Timer::~Timer()
 
 void Timer::Start()
 {
-	mIsStarted = true;
-	mIsPaused = false;
-	mStartTick = SDL_GetTicks();
+	is_started = true;
+	is_paused = false;
+	start_tick = SDL_GetTicks();
 }
 
 void Timer::Stop()
 {
-	mIsPaused = false;
-	mIsStarted = false;
+	is_paused = false;
+	is_started = false;
 }
 
 void Timer::Paused()
 {
-	if (mIsStarted == true && mIsPaused == false)
+	if (is_started == true && is_paused == false)
 	{
-		mIsPaused = true;
-		mPausedTick = SDL_GetTicks() - mStartTick;
-		mPausedTick = 0;
+		is_paused = true;
+		paused_tick = SDL_GetTicks() - start_tick;
+		paused_tick = 0;
 	}
 }
 
 int Timer::GetTicks()
 {
-	if (mIsStarted == true)
+	if (is_started == true)
 	{
-		if (mIsPaused == true)
+		if (is_paused == true)
 		{
-			return mPausedTick;
+			return paused_tick;
 		}
 		else
 		{
-			return SDL_GetTicks() - mStartTick;
+			return SDL_GetTicks() - start_tick;
 		}
 	}
 	return 0;
@@ -54,10 +54,10 @@ int Timer::GetTicks()
 
 bool Timer::IsStarted()
 {
-	return mIsStarted;
+	return is_started;
 }
 
 bool Timer::IsPaused()
 {
-	return mIsPaused;
+	return is_paused;
 }
