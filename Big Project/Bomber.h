@@ -6,8 +6,6 @@
 #include "CommonFunc.h"
 #include "Bomb.h"
 
-#define ERROR_NUM 2
-
 class Bomb;
 
 class Bomber : public BaseObject
@@ -26,14 +24,16 @@ public:
 
 	bool LoadClipImg(std::string path, SDL_Renderer* screen);
 	void BomberShow(SDL_Renderer* des);
-	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen);
+	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_data);
 	void SetClip();
 	void HandleMove(Map& map_data);
 	void CheckToMap(Map& map_data);
 	void GetBombList(std::vector<Bomb*> bomb_list);
-	void BombShow(SDL_Renderer* des);
+	void BombShow(SDL_Renderer* des, Map& map_data);
+
 private:
 	std::vector<Bomb*> pbomb_list;
+
 	float x_val;
 	float y_val;
 
@@ -44,7 +44,7 @@ private:
 	int width_frame;
 	int height_frame;
 
-	SDL_Rect frame_clip[4];
+	SDL_Rect frame_clip[5];
 	Input input_type;
 	int status;
 

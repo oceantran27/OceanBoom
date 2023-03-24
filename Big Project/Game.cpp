@@ -55,12 +55,9 @@ int main(int argc, char* argv[])
 	gameMap.LoadTiles(gScreen);
 	Map gTileMap = gameMap.GetMap();
 
-	Bomber* pPlayer;
+	Bomber pPlayer;
 	pPlayer.LoadClipImg("Images/down.png", gScreen);
 	pPlayer.SetClip();
-
-	Bomb* pBomb;
-
 
 	bool quit = false;
 	while (!quit)
@@ -70,14 +67,14 @@ int main(int argc, char* argv[])
 		{
 			if (gEvent.type == SDL_QUIT)
 				quit = true; 
-			pPlayer.HandleInputAction(gEvent, gScreen);
+			pPlayer.HandleInputAction(gEvent, gScreen, gTileMap);
 		}
 
 		SDL_SetRenderDrawColor(gScreen, 255, 255, 255, 255);
 		SDL_RenderClear(gScreen);
 
 		gameMap.DrawMap(gScreen);
-		pPlayer.BombShow(gScreen);
+		pPlayer.BombShow(gScreen, gTileMap);
 		pPlayer.BomberShow(gScreen);
 		pPlayer.HandleMove(gTileMap);
 

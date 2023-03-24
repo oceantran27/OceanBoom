@@ -14,7 +14,7 @@ static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 
-const int FRAME_PER_SECOND = 20;
+const int FRAME_PER_SECOND = 24;
 const int SCREEN_WIDTH = 52*15;
 const int SCREEN_HEIGHT = 52*13;
 const int SCREEN_BPP = 32;
@@ -23,6 +23,7 @@ const int COLOR_KEY_R = 35;
 const int COLOR_KEY_G = 31;
 const int COLOR_KEY_B = 31;
 
+#define ERROR_NUM 2
 #define TILE_SIZE 52
 #define MAX_MAP_X 15
 #define MAX_MAP_Y 13

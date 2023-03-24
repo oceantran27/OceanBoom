@@ -1,7 +1,9 @@
 #include "Bomber.h"
 
 #define BLANK_TILE 0
-#define PLAYER_SPEED 4
+#define NEWLY_BOOM_PLANTED -1
+#define BOOM_PLANTED -2
+#define PLAYER_SPEED 5
 
 
 Bomber::Bomber()
@@ -100,7 +102,7 @@ void Bomber::BomberShow(SDL_Renderer* des)
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
 }
 
-void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
+void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_data)
 {
 	if (event.type == SDL_KEYDOWN)
 	{
@@ -149,13 +151,15 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 
 		case SDLK_SPACE:
 		{
-			Bomb* pbomb = new Bomb();
-				pbomb->plant();
-				int tmp_x = (int)(x_pos + ERROR_NUM) / TILE_SIZE;
-				int tmp_y = (int)(y_pos + ERROR_NUM) / TILE_SIZE;
-				pbomb->LoadImg("Images/bomb.png", screen);
-				pbomb->SetRect(tmp_x * TILE_SIZE + ERROR_NUM, tmp_y * TILE_SIZE + ERROR_NUM);
+			int x_num_tile = ((x_pos + ERROR_NUM) / TILE_SIZE);
+			int y_num_tile = ((y_pos + ERROR_NUM) / TILE_SIZE);
+			if (map_data.tile_map[y_num_tile][x_num_tile] == BLANK_TILE)
+			{
+				Bomb* pbomb = new Bomb();
+				pbomb->plant(x_num_tile , y_num_tile, screen);
 				pbomb_list.push_back(pbomb);
+				map_data.tile_map[y_num_tile][x_num_tile] = NEWLY_BOOM_PLANTED;
+			}
 		}
 		break;
 		}
@@ -190,19 +194,8 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen)
 		break;
 		}
 	}
-
 }
 
-void Bomber::BombShow(SDL_Renderer* des)
-{
-	for (auto pbomb : pbomb_list)
-	{
-		if (pbomb != NULL)
-		{
-
-		}
-	}
-}
 void Bomber::HandleMove(Map& map_data)
 {
 	x_val = 0;
@@ -228,6 +221,12 @@ void Bomber::HandleMove(Map& map_data)
 
 void Bomber::CheckToMap(Map& map_data)
 {
+	int x_num_tile = ((x_pos) / TILE_SIZE);
+	int y_num_tile = ((y_pos) / TILE_SIZE);
+
+	int old_x_pos = x_pos;
+	int old_y_pos = y_pos;
+
 	x_pos += x_val;
 	y_pos += y_val;
 
@@ -241,51 +240,92 @@ void Bomber::CheckToMap(Map& map_data)
 	y2 = (y_pos + height_frame - ERROR_NUM) / TILE_SIZE;
 
 
-	if (x_pos < TILE_SIZE || x_pos + width_frame + TILE_SIZE > map_data.max_x)
+	//if (x_pos < TILE_SIZE || x_pos + width_frame + TILE_SIZE > map_data.max_x)
+	//{
+	//	x_pos -= x_val;
+	//}
+	//if (y_pos < TILE_SIZE || y_pos + height_frame + TILE_SIZE > map_data.max_y)
+	//{
+	//	y_pos -= y_val;
+	//}
+
+	bool is_standed_on_bomb = map_data.tile_map[y_num_tile][x_num_tile] == NEWLY_BOOM_PLANTED;
+	bool is_standing_on_bomb_1 = map_data.tile_map[y1][x1] == NEWLY_BOOM_PLANTED;
+	bool is_standing_on_bomb_2 = map_data.tile_map[y2][x2] == NEWLY_BOOM_PLANTED;
+
+	if (is_standed_on_bomb && (!is_standing_on_bomb_1 || !is_standing_on_bomb_2))
 	{
-		x_pos -= x_val;
+		map_data.tile_map[y_num_tile][x_num_tile] = BOOM_PLANTED;
 	}
-	if (y_pos < TILE_SIZE || y_pos + height_frame + TILE_SIZE > map_data.max_y)
-	{
-		y_pos -= y_val;
-	}
+
 
 	int top_right = map_data.tile_map[y1][x2];
 	int bot_right = map_data.tile_map[y2][x2];
 	int top_left = map_data.tile_map[y1][x1];
 	int bot_left = map_data.tile_map[y2][x1];
+	
+	bool check_top_right = top_right != BLANK_TILE && top_right != NEWLY_BOOM_PLANTED;
+	bool check_top_left = top_left != BLANK_TILE && top_left != NEWLY_BOOM_PLANTED;
+	bool check_bot_right = bot_right != BLANK_TILE && bot_right != NEWLY_BOOM_PLANTED;
+	bool check_bot_left = bot_left != BLANK_TILE && bot_left != NEWLY_BOOM_PLANTED;
+
 
 	if (x_val > 0)
 	{
-		if (top_right != BLANK_TILE || bot_right != BLANK_TILE)
+		if (check_top_right || check_bot_right)
 		{
-			x_pos = x2 * TILE_SIZE - width_frame - ERROR_NUM;
+			//x_pos = x2 * TILE_SIZE - width_frame - ERROR_NUM;
+			x_pos = old_x_pos;
 			x_val = 0;
 		}
 	}
 	else if (x_val < 0)
 	{
-		if (top_left != BLANK_TILE || bot_left != BLANK_TILE)
+		if (check_top_left || check_bot_left)
 		{
-			x_pos = (x1 + 1) * TILE_SIZE;
+			//x_pos = (x1 + 1) * TILE_SIZE;
+			x_pos = old_x_pos;
 			x_val = 0;
 		}
 	}
 
 	if (y_val > 0)
 	{
-		if (bot_right != BLANK_TILE || bot_left != BLANK_TILE)
+		if (check_bot_right || check_bot_left)
 		{
-			y_pos = y2 * TILE_SIZE - height_frame - ERROR_NUM;
+			//y_pos = y2 * TILE_SIZE - height_frame - ERROR_NUM;
+			y_pos = old_y_pos;
 			y_val = 0;
 		}
 	}
 	else if (y_val < 0)
 	{
-		if (top_right != BLANK_TILE || top_left != BLANK_TILE)
+		if (check_top_right || check_top_left)
 		{
-			y_pos = (y1 + 1) * TILE_SIZE;
+			//y_pos = (y1 + 1) * TILE_SIZE;
+			y_pos = old_y_pos;
 			y_val = 0;
 		}
 	}
 }
+
+void Bomber::BombShow(SDL_Renderer* des, Map& map_data)
+{
+	for (int i = 0; i < pbomb_list.size(); i++)
+	{
+		if (!pbomb_list[i]->is_active())
+		{
+			map_data.tile_map[pbomb_list[i]->GetYNumTile()][pbomb_list[i]->GetXNumTile()] = BLANK_TILE;
+			delete pbomb_list[i];
+			pbomb_list[i] = NULL;
+			pbomb_list.erase(pbomb_list.begin() + i);
+		}
+		else
+		{
+			pbomb_list[i]->Show(des);
+		}
+	}
+}
+
+
+
