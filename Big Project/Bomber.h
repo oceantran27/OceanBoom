@@ -5,6 +5,7 @@
 #include "BaseObject.h"
 #include "CommonFunc.h"
 #include "Bomb.h"
+#include "Map.h"
 
 class Bomb;
 
@@ -33,6 +34,9 @@ public:
 
 private:
 	std::vector<Bomb*> pbomb_list;
+
+	int x_tile_closest_bomb;
+	int y_tile_closet_bomb;
 
 	float x_val;
 	float y_val;

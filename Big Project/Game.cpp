@@ -51,9 +51,9 @@ int main(int argc, char* argv[])
 		return -1;
 
 	GameMap gameMap;
-	gameMap.LoadMap("Map/Level 0.txt");
+	gameMap.LoadMap("Map/Level 1.txt");
 	gameMap.LoadTiles(gScreen);
-	Map gTileMap = gameMap.GetMap();
+	Map gMap = gameMap.GetMap();
 
 	Bomber pPlayer;
 	pPlayer.LoadClipImg("Images/down.png", gScreen);
@@ -67,17 +67,17 @@ int main(int argc, char* argv[])
 		{
 			if (gEvent.type == SDL_QUIT)
 				quit = true; 
-			pPlayer.HandleInputAction(gEvent, gScreen, gTileMap);
+			pPlayer.HandleInputAction(gEvent, gScreen, gMap);
 		}
 
 		SDL_SetRenderDrawColor(gScreen, 255, 255, 255, 255);
 		SDL_RenderClear(gScreen);
 
 		gameMap.DrawMap(gScreen);
-		pPlayer.BombShow(gScreen, gTileMap);
+		gameMap.UpdateMap(gMap);
+		pPlayer.HandleMove(gMap);
+		pPlayer.BombShow(gScreen, gMap);
 		pPlayer.BomberShow(gScreen);
-		pPlayer.HandleMove(gTileMap);
-
 
 		SDL_RenderPresent(gScreen);
 

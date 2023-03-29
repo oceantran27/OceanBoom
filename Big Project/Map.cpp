@@ -1,5 +1,7 @@
 #include "Map.h"
 
+
+
 void GameMap::LoadMap(const char* name)
 {
 	FILE *fp = NULL;
@@ -70,6 +72,10 @@ void GameMap::DrawMap(SDL_Renderer* screen)
 		for (int j = x1; j < x2; j += TILE_SIZE)
 		{
 			int val = map_.tile_map[map_y][map_x];
+			if (val < BLANK_TILE)
+			{
+				val = BLANK_TILE;
+			}
 			tiles[val].SetRect(j, i);
 			tiles[val].Render(screen);
 			map_x++;

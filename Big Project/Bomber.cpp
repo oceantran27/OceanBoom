@@ -1,9 +1,6 @@
 #include "Bomber.h"
 
-#define BLANK_TILE 0
-#define NEWLY_BOOM_PLANTED -1
-#define BOOM_PLANTED -2
-#define PLAYER_SPEED 5
+#define PLAYER_SPEED 6
 
 
 Bomber::Bomber()
@@ -152,13 +149,15 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_
 		case SDLK_SPACE:
 		{
 			int x_num_tile = ((x_pos + ERROR_NUM) / TILE_SIZE);
-			int y_num_tile = ((y_pos + ERROR_NUM) / TILE_SIZE);
+			int y_num_tile = ((y_pos + 0.5*height_frame + ERROR_NUM) / TILE_SIZE);
 			if (map_data.tile_map[y_num_tile][x_num_tile] == BLANK_TILE)
 			{
 				Bomb* pbomb = new Bomb();
-				pbomb->plant(x_num_tile , y_num_tile, screen);
+				pbomb->SetScreen(screen);
+				pbomb->SetMap(map_data);
+				pbomb->Plant(x_num_tile, y_num_tile);
 				pbomb_list.push_back(pbomb);
-				map_data.tile_map[y_num_tile][x_num_tile] = NEWLY_BOOM_PLANTED;
+				map_data.tile_map[y_num_tile][x_num_tile] = BOMB_PLANTED;	
 			}
 		}
 		break;
@@ -221,9 +220,6 @@ void Bomber::HandleMove(Map& map_data)
 
 void Bomber::CheckToMap(Map& map_data)
 {
-	int x_num_tile = ((x_pos) / TILE_SIZE);
-	int y_num_tile = ((y_pos) / TILE_SIZE);
-
 	int old_x_pos = x_pos;
 	int old_y_pos = y_pos;
 
@@ -239,42 +235,20 @@ void Bomber::CheckToMap(Map& map_data)
 	y1 = (y_pos + ERROR_NUM) / TILE_SIZE;
 	y2 = (y_pos + height_frame - ERROR_NUM) / TILE_SIZE;
 
-
-	//if (x_pos < TILE_SIZE || x_pos + width_frame + TILE_SIZE > map_data.max_x)
-	//{
-	//	x_pos -= x_val;
-	//}
-	//if (y_pos < TILE_SIZE || y_pos + height_frame + TILE_SIZE > map_data.max_y)
-	//{
-	//	y_pos -= y_val;
-	//}
-
-	bool is_standed_on_bomb = map_data.tile_map[y_num_tile][x_num_tile] == NEWLY_BOOM_PLANTED;
-	bool is_standing_on_bomb_1 = map_data.tile_map[y1][x1] == NEWLY_BOOM_PLANTED;
-	bool is_standing_on_bomb_2 = map_data.tile_map[y2][x2] == NEWLY_BOOM_PLANTED;
-
-	if (is_standed_on_bomb && (!is_standing_on_bomb_1 || !is_standing_on_bomb_2))
-	{
-		map_data.tile_map[y_num_tile][x_num_tile] = BOOM_PLANTED;
-	}
-
-
 	int top_right = map_data.tile_map[y1][x2];
 	int bot_right = map_data.tile_map[y2][x2];
 	int top_left = map_data.tile_map[y1][x1];
 	int bot_left = map_data.tile_map[y2][x1];
 	
-	bool check_top_right = top_right != BLANK_TILE && top_right != NEWLY_BOOM_PLANTED;
-	bool check_top_left = top_left != BLANK_TILE && top_left != NEWLY_BOOM_PLANTED;
-	bool check_bot_right = bot_right != BLANK_TILE && bot_right != NEWLY_BOOM_PLANTED;
-	bool check_bot_left = bot_left != BLANK_TILE && bot_left != NEWLY_BOOM_PLANTED;
-
+	bool check_top_right = top_right != BLANK_TILE && top_right != BOMB_PLANTED;
+	bool check_top_left = top_left != BLANK_TILE && top_left != BOMB_PLANTED;
+	bool check_bot_right = bot_right != BLANK_TILE && bot_right != BOMB_PLANTED;
+	bool check_bot_left = bot_left != BLANK_TILE && bot_left != BOMB_PLANTED ;
 
 	if (x_val > 0)
 	{
 		if (check_top_right || check_bot_right)
 		{
-			//x_pos = x2 * TILE_SIZE - width_frame - ERROR_NUM;
 			x_pos = old_x_pos;
 			x_val = 0;
 		}
@@ -283,7 +257,6 @@ void Bomber::CheckToMap(Map& map_data)
 	{
 		if (check_top_left || check_bot_left)
 		{
-			//x_pos = (x1 + 1) * TILE_SIZE;
 			x_pos = old_x_pos;
 			x_val = 0;
 		}
@@ -293,7 +266,6 @@ void Bomber::CheckToMap(Map& map_data)
 	{
 		if (check_bot_right || check_bot_left)
 		{
-			//y_pos = y2 * TILE_SIZE - height_frame - ERROR_NUM;
 			y_pos = old_y_pos;
 			y_val = 0;
 		}
@@ -302,9 +274,20 @@ void Bomber::CheckToMap(Map& map_data)
 	{
 		if (check_top_right || check_top_left)
 		{
-			//y_pos = (y1 + 1) * TILE_SIZE;
 			y_pos = old_y_pos;
 			y_val = 0;
+		}
+	}
+
+	if (pbomb_list.size() != 0)
+	{
+		int bomb_x_pos = pbomb_list.back()->GetXNumTile();
+		int bomb_y_pos = pbomb_list.back()->GetYNumTile();
+
+		if ((x1 != bomb_x_pos || x2 != bomb_x_pos || y1 != bomb_y_pos || y2 != bomb_y_pos) 
+			&& (x_val != 0 || y_val != 0))
+		{
+			map_data.tile_map[bomb_y_pos][bomb_x_pos] = BLOCK_TILE;
 		}
 	}
 }
@@ -313,7 +296,7 @@ void Bomber::BombShow(SDL_Renderer* des, Map& map_data)
 {
 	for (int i = 0; i < pbomb_list.size(); i++)
 	{
-		if (!pbomb_list[i]->is_active())
+		if (!pbomb_list[i]->IsActive())
 		{
 			map_data.tile_map[pbomb_list[i]->GetYNumTile()][pbomb_list[i]->GetXNumTile()] = BLANK_TILE;
 			delete pbomb_list[i];
