@@ -1,14 +1,21 @@
 #include "Bomber.h"
 
-#define PLAYER_SPEED 6
+#define PLAYER_SPEED 5
+#define LIMIT_LAG 14
+#define EXPLODE_MID_TILE 10
+#define EXPLODE_X_TILE 11
+#define EXPLODE_Y_TILE 12
+
 
 
 Bomber::Bomber()
 {
 	frame = 0;
 
-	x_pos = 52;
-	y_pos = 52;
+	bomb_power = 1;
+
+	x_pos = TILE_SIZE;
+	y_pos = TILE_SIZE*3;
 
 	x_val = 0;
 	y_val = 0;
@@ -37,7 +44,7 @@ bool Bomber::LoadClipImg(std::string path, SDL_Renderer* screen)
 		return false;
 	}
 
-	width_frame = rect.w / 3;
+	width_frame = rect.w / BOMBER_FRAMES;
 	height_frame = rect.h;
 
 	return true;
@@ -47,7 +54,7 @@ void Bomber::SetClip()
 {
 	if (width_frame > 0 && height_frame > 0)
 	{
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < BOMBER_FRAMES; i++)
 		{
 			frame_clip[i].x = i*width_frame;
 			frame_clip[i].y = 0;
@@ -88,7 +95,7 @@ void Bomber::BomberShow(SDL_Renderer* des)
 		frame = 0;
 	}
 
-	if (frame >= 3)
+	if (frame >= BOMBER_FRAMES)
 		frame = 0;
 
 	rect.x = x_pos;
@@ -97,6 +104,8 @@ void Bomber::BomberShow(SDL_Renderer* des)
 	SDL_Rect* current_clip = &frame_clip[frame];
 	SDL_Rect renderQuad = { rect.x, rect.y, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
+
+	SDL_Delay(1500 / FRAME_PER_SECOND);
 }
 
 void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_data)
@@ -145,22 +154,6 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_
 
 		}
 		break;
-
-		case SDLK_SPACE:
-		{
-			int x_num_tile = ((x_pos + ERROR_NUM) / TILE_SIZE);
-			int y_num_tile = ((y_pos + 0.5*height_frame + ERROR_NUM) / TILE_SIZE);
-			if (map_data.tile_map[y_num_tile][x_num_tile] == BLANK_TILE)
-			{
-				Bomb* pbomb = new Bomb();
-				pbomb->SetScreen(screen);
-				pbomb->SetMap(map_data);
-				pbomb->Plant(x_num_tile, y_num_tile);
-				pbomb_list.push_back(pbomb);
-				map_data.tile_map[y_num_tile][x_num_tile] = BOMB_PLANTED;	
-			}
-		}
-		break;
 		}
 	}
 
@@ -189,6 +182,30 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_
 		case SDLK_DOWN:
 		{
 			input_type.down = 0;
+		}
+		break;
+
+		case SDLK_SPACE:
+		{
+			int x, y;
+			if (status == WALK_LEFT)
+			{
+				x = ((x_pos + width_frame - ERROR_NUM) / TILE_SIZE);
+			}
+			else
+			{
+				x = ((x_pos + ERROR_NUM) / TILE_SIZE);
+			}
+				y = ((y_pos + 0.7 * height_frame - ERROR_NUM) / TILE_SIZE);
+
+			if (map_data.tile_map[y][x] == BLANK_TILE)
+			{
+				Bomb* pbomb = new Bomb();
+				pbomb->SetScreen(screen);
+				pbomb->Plant(x, y);
+				pbomb_list.push_back(pbomb);
+				map_data.tile_map[y][x] = BOMB_PLANTED;
+			}
 		}
 		break;
 		}
@@ -249,16 +266,47 @@ void Bomber::CheckToMap(Map& map_data)
 	{
 		if (check_top_right || check_bot_right)
 		{
-			x_pos = old_x_pos;
-			x_val = 0;
+			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
+			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
+			if (foot_lag_part  <= LIMIT_LAG && foot_lag_part >= 0 
+				&& check_bot_right && map_data.tile_map[y2 - 1][x1 + 1] == BLANK_TILE)
+			{
+				y_pos -= foot_lag_part + ERROR_NUM;
+				int y3 = y_pos / TILE_SIZE;
+			}
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0 
+				&& check_top_right && map_data.tile_map[y1 + 1][x1 + 1] == BLANK_TILE)
+			{
+				y_pos += head_lag_part + ERROR_NUM;
+			}
+			else
+			{
+				x_pos = old_x_pos;
+				x_val = 0;
+			}
 		}
 	}
 	else if (x_val < 0)
 	{
 		if (check_top_left || check_bot_left)
 		{
-			x_pos = old_x_pos;
-			x_val = 0;
+			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
+			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
+			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0 
+				&& check_bot_left && map_data.tile_map[y2 - 1][x2 - 1] == BLANK_TILE)
+			{
+				y_pos -= foot_lag_part + ERROR_NUM;
+			}
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0 
+				&& check_top_left && map_data.tile_map[y1 + 1][x2 - 1] == BLANK_TILE)
+			{
+				y_pos += head_lag_part + ERROR_NUM;
+			}
+			else
+			{
+				x_pos = old_x_pos;
+				x_val = 0;
+			}
 		}
 	}
 
@@ -266,28 +314,148 @@ void Bomber::CheckToMap(Map& map_data)
 	{
 		if (check_bot_right || check_bot_left)
 		{
-			y_pos = old_y_pos;
-			y_val = 0;
+			int foot_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
+			int foot_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
+			if (foot_left_lag_part <= LIMIT_LAG && foot_left_lag_part >= 0 
+				&& check_bot_left && map_data.tile_map[y1 + 1][x2] == BLANK_TILE)
+			{
+				x_pos += foot_left_lag_part + ERROR_NUM;
+			}
+			else if (foot_right_lag_part <= LIMIT_LAG && foot_right_lag_part > 0 
+				&& check_bot_right && map_data.tile_map[y1 + 1][x1] == BLANK_TILE)
+			{
+				x_pos -= foot_right_lag_part + ERROR_NUM;
+			}
+			else
+			{
+				y_pos = old_y_pos;
+				y_val = 0;
+			}
 		}
 	}
 	else if (y_val < 0)
 	{
 		if (check_top_right || check_top_left)
 		{
-			y_pos = old_y_pos;
-			y_val = 0;
+			int head_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
+			int head_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
+			if (head_left_lag_part <= LIMIT_LAG && head_left_lag_part >= 0 
+				&& check_top_left && map_data.tile_map[y2 - 1][x2] == BLANK_TILE)
+			{
+				x_pos += head_left_lag_part + ERROR_NUM;
+			}
+			else if (head_right_lag_part <= LIMIT_LAG && head_right_lag_part > 0 
+				&& check_top_right && map_data.tile_map[y2 - 1][x1] == BLANK_TILE)
+			{
+				x_pos -= head_right_lag_part + ERROR_NUM;
+			}
+			else
+			{
+				y_pos = old_y_pos;
+				y_val = 0;
+			}
 		}
 	}
 
 	if (pbomb_list.size() != 0)
 	{
-		int bomb_x_pos = pbomb_list.back()->GetXNumTile();
-		int bomb_y_pos = pbomb_list.back()->GetYNumTile();
-
-		if ((x1 != bomb_x_pos || x2 != bomb_x_pos || y1 != bomb_y_pos || y2 != bomb_y_pos) 
-			&& (x_val != 0 || y_val != 0))
+		for (auto bomb : pbomb_list)
 		{
-			map_data.tile_map[bomb_y_pos][bomb_x_pos] = BLOCK_TILE;
+			int bomb_x = bomb->GetX();
+			int bomb_y = bomb->GetY();
+			int bomb_x_pos = bomb_x * TILE_SIZE;
+			int bomb_y_pos = bomb_y * TILE_SIZE;
+
+			if ((y_pos + height_frame < bomb_y_pos) ||
+				(y_pos > bomb_y_pos + TILE_SIZE) ||
+				(x_pos + width_frame < bomb_x_pos) ||
+				(x_pos > bomb_x_pos + TILE_SIZE))
+			{
+				map_data.tile_map[bomb_y][bomb_x] = BLOCK_TILE;
+			}
+		}
+	}
+}
+
+void Bomber::BombExplode(Bomb* bomb_, Map& map_data)
+{
+	int x = bomb_->GetX();
+	int y = bomb_->GetY(); 
+	//map_data.tile_map[y][x] = EXPLODE_MID_TILE;
+
+	for (int i = -bomb_power; i < 0; i++) {
+		int x1 = x + i;
+
+		if (map_data.tile_map[y][x1] == LIMIT_TILE)
+		{
+			break;
+		}
+
+		if (map_data.tile_map[y][x1] != BLANK_TILE &&
+			map_data.tile_map[y][x1] != BLOCK_TILE &&
+			map_data.tile_map[y][x1] != BOMB_PLANTED)
+		{
+			//map_data.tile_map[y][x1] = EXPLODE_X_TILE;
+			map_data.tile_map[y][x1] = BLANK_TILE;
+
+			break;
+		}
+	}
+
+	for (int i = 1; i <= bomb_power; i++) {
+		int x1 = x + i;
+
+		if (map_data.tile_map[y][x1] == LIMIT_TILE)
+		{
+			break;
+		}
+
+		if (map_data.tile_map[y][x1] != BLANK_TILE &&
+			map_data.tile_map[y][x1] != BLOCK_TILE &&
+			map_data.tile_map[y][x1] != BOMB_PLANTED)
+		{
+			//map_data.tile_map[y][x1] = EXPLODE_X_TILE;
+			map_data.tile_map[y][x1] = BLANK_TILE;
+
+			break;
+		}
+	}
+
+	for (int i = -bomb_power; i < 0; i++) {
+		int y1 = y + i;
+
+		if (map_data.tile_map[y1][x] == LIMIT_TILE)
+		{
+			break;
+		}
+
+		if (map_data.tile_map[y1][x] != BLANK_TILE &&
+			map_data.tile_map[y1][x] != BLOCK_TILE &&
+			map_data.tile_map[y1][x] != BOMB_PLANTED)
+		{
+			//map_data.tile_map[y1][x] = EXPLODE_Y_TILE;
+			map_data.tile_map[y1][x] = BLANK_TILE;
+
+			break;
+		}
+	}
+
+	for (int i = 1; i <= bomb_power; i++) {
+		int y1 = y + i;
+
+		if (map_data.tile_map[y1][x] == LIMIT_TILE)
+		{
+			break;
+		}
+
+		if (map_data.tile_map[y1][x] != BLANK_TILE &&
+			map_data.tile_map[y1][x] != BLOCK_TILE &&
+			map_data.tile_map[y1][x] != BOMB_PLANTED)
+		{
+			//map_data.tile_map[y1][x] = EXPLODE_Y_TILE;
+			map_data.tile_map[y1][x] = BLANK_TILE;
+
+			break;
 		}
 	}
 }
@@ -296,9 +464,11 @@ void Bomber::BombShow(SDL_Renderer* des, Map& map_data)
 {
 	for (int i = 0; i < pbomb_list.size(); i++)
 	{
-		if (!pbomb_list[i]->IsActive())
+		SDL_TimerID current_timer_id = SDL_GetTicks();
+		if (current_timer_id >= pbomb_list[i]->GetTimer())
 		{
-			map_data.tile_map[pbomb_list[i]->GetYNumTile()][pbomb_list[i]->GetXNumTile()] = BLANK_TILE;
+			map_data.tile_map[pbomb_list[i]->GetY()][pbomb_list[i]->GetX()] = BLANK_TILE;
+			BombExplode(pbomb_list[i], map_data);
 			delete pbomb_list[i];
 			pbomb_list[i] = NULL;
 			pbomb_list.erase(pbomb_list.begin() + i);
@@ -309,6 +479,8 @@ void Bomber::BombShow(SDL_Renderer* des, Map& map_data)
 		}
 	}
 }
+
+
 
 
 

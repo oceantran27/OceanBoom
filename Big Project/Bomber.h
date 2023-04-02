@@ -7,6 +7,8 @@
 #include "Bomb.h"
 #include "Map.h"
 
+#define BOMBER_FRAMES 3
+
 class Bomb;
 
 class Bomber : public BaseObject
@@ -17,6 +19,7 @@ public:
 
 	enum WalkType
 	{
+		WALK_NONE = 0,
 		WALK_RIGHT = 1,
 		WALK_LEFT = 2,
 		WALK_UP = 3,
@@ -31,12 +34,13 @@ public:
 	void CheckToMap(Map& map_data);
 	void GetBombList(std::vector<Bomb*> bomb_list);
 	void BombShow(SDL_Renderer* des, Map& map_data);
+	void BombExplode(Bomb* bomb_, Map& map_data);
+	void IncreaseBombPower() { bomb_power++; }
 
 private:
-	std::vector<Bomb*> pbomb_list;
+	int bomb_power;
 
-	int x_tile_closest_bomb;
-	int y_tile_closet_bomb;
+	std::vector<Bomb*> pbomb_list;
 
 	float x_val;
 	float y_val;
@@ -48,10 +52,9 @@ private:
 	int width_frame;
 	int height_frame;
 
-	SDL_Rect frame_clip[5];
+	SDL_Rect frame_clip[BOMBER_FRAMES];
 	Input input_type;
 	int status;
-
 };
  
 #endif // !MAIN_OBJECT_H

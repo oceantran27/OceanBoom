@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cmath>
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
@@ -19,17 +20,17 @@ static SDL_Event gEvent;
 #define LIMIT_TILE 1
 #define BOMB_PLANTED -1
 #define TILE_SIZE 52
-#define MAX_MAP_X 15
-#define MAX_MAP_Y 13
+#define MAX_MAP_X 25
+#define MAX_MAP_Y 15
 
-const int FRAME_PER_SECOND = 22;
+const int FRAME_PER_SECOND = 30;
 const int SCREEN_WIDTH = TILE_SIZE*MAX_MAP_X;
 const int SCREEN_HEIGHT = TILE_SIZE*MAX_MAP_Y;
 const int SCREEN_BPP = 64;
 
-const int COLOR_KEY_R = 35;
-const int COLOR_KEY_G = 31;
-const int COLOR_KEY_B = 31;
+const int COLOR_KEY_R = 5;
+const int COLOR_KEY_G = 140;
+const int COLOR_KEY_B = 60;
 
 
 struct Input

@@ -1,7 +1,5 @@
 #include "Map.h"
 
-
-
 void GameMap::LoadMap(const char* name)
 {
 	FILE *fp = NULL;
@@ -41,7 +39,7 @@ void GameMap::LoadTiles(SDL_Renderer* screen)
 	for (int i = 0; i < MAX_TILES; i++)
 	{
 		char numImg = i + '0';
-		fileImg = "Images/background ";
+		fileImg = "Images/";
 		fileImg = fileImg + numImg;
 		fileImg = fileImg + ".png";
 		fopen_s(&fp, fileImg.c_str(), "rb");

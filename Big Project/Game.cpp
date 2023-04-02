@@ -51,7 +51,11 @@ int main(int argc, char* argv[])
 		return -1;
 
 	GameMap gameMap;
-	gameMap.LoadMap("Map/Level 1.txt");
+	std::string name_game = "Map/Game_";
+	char number_game = 1 + '0';
+	name_game += number_game;
+	name_game += ".txt";
+	gameMap.LoadMap(name_game.c_str());
 	gameMap.LoadTiles(gScreen);
 	Map gMap = gameMap.GetMap();
 
@@ -70,7 +74,7 @@ int main(int argc, char* argv[])
 			pPlayer.HandleInputAction(gEvent, gScreen, gMap);
 		}
 
-		SDL_SetRenderDrawColor(gScreen, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
 		SDL_RenderClear(gScreen);
 
 		gameMap.DrawMap(gScreen);
