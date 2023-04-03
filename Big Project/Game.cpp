@@ -45,19 +45,23 @@ void Close()
 
 int main(int argc, char* argv[])
 {
-	Timer fpsTime;
+	Timer fps_time;
 
 	if (!Init())
 		return -1;
 
-	GameMap gameMap;
-	std::string name_game = "Map/Game_";
+	GameMap gGameMap;
+	std::string name_main_map = "Map/Game_";
+	std::string name_item_map = "Map/Item_";
 	char number_game = 1 + '0';
-	name_game += number_game;
-	name_game += ".txt";
-	gameMap.LoadMap(name_game.c_str());
-	gameMap.LoadTiles(gScreen);
-	Map gMap = gameMap.GetMap();
+	name_main_map += number_game;
+	name_item_map += number_game;
+	name_item_map += ".txt";
+	name_main_map += ".txt";
+	gGameMap.LoadMap(name_main_map.c_str(), name_item_map.c_str());
+	gGameMap.LoadTiles(gScreen);
+	Map gMainMap = gGameMap.GetMainMap();
+	Map gItemMap = gGameMap.GetItemMap();
 
 	Bomber pPlayer;
 	pPlayer.LoadClipImg("Images/down.png", gScreen);
@@ -66,26 +70,27 @@ int main(int argc, char* argv[])
 	bool quit = false;
 	while (!quit)
 	{
-		fpsTime.Start();
+		fps_time.Start();
 		while (SDL_PollEvent (&gEvent))
 		{
 			if (gEvent.type == SDL_QUIT)
 				quit = true; 
-			pPlayer.HandleInputAction(gEvent, gScreen, gMap);
+			pPlayer.HandleInputAction(gEvent, gScreen, gMainMap);
 		}
 
 		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
 		SDL_RenderClear(gScreen);
 
-		gameMap.DrawMap(gScreen);
-		gameMap.UpdateMap(gMap);
-		pPlayer.HandleMove(gMap);
-		pPlayer.BombShow(gScreen, gMap);
+		gGameMap.DrawMap(gScreen);
+		gGameMap.UpdateItemMap(gItemMap);
+		gGameMap.UpdateMainMap(gMainMap);
+		pPlayer.HandleMove(gMainMap);
+		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
 		pPlayer.BomberShow(gScreen);
 
 		SDL_RenderPresent(gScreen);
 
-		int currentTime = fpsTime.GetTicks();
+		int currentTime = fps_time.GetTicks();
 		int oneFrameTime = 1000 / FRAME_PER_SECOND;
 
 		if (currentTime < oneFrameTime)

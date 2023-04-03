@@ -28,18 +28,20 @@ public:
 
 	bool LoadClipImg(std::string path, SDL_Renderer* screen);
 	void BomberShow(SDL_Renderer* des);
-	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& map_data);
+	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& main_map_);
 	void SetClip();
-	void HandleMove(Map& map_data);
-	void CheckToMap(Map& map_data);
-	void GetBombList(std::vector<Bomb*> bomb_list);
-	void BombShow(SDL_Renderer* des, Map& map_data);
-	void BombExplode(Bomb* bomb_, Map& map_data);
+	void HandleMove(Map& main_map_);
+	void CheckToMap(Map& main_map_);
+	void BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_);
+	void BombExplode(SDL_Renderer* des, Bomb* bomb_, Map& main_map_, Map& item_map_);
 	void IncreaseBombPower() { bomb_power++; }
+	void ExplodeShow();
+
+
+
 
 private:
 	int bomb_power;
-
 	std::vector<Bomb*> pbomb_list;
 
 	float x_val;
