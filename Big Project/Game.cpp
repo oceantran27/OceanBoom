@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
 	pPlayer.SetClip();
 
 	bool quit = false;
+	int count = 2;
 	while (!quit)
 	{
 		fps_time.Start();
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 		gGameMap.DrawMap(gScreen);
 		gGameMap.UpdateItemMap(gItemMap);
 		gGameMap.UpdateMainMap(gMainMap);
-		pPlayer.HandleMove(gMainMap);
+		pPlayer.HandleMove(gMainMap,gItemMap);
 		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
 		pPlayer.BomberShow(gScreen);
 

@@ -30,18 +30,18 @@ public:
 	void BomberShow(SDL_Renderer* des);
 	void HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& main_map_);
 	void SetClip();
-	void HandleMove(Map& main_map_);
-	void CheckToMap(Map& main_map_);
+	void HandleMove(Map& main_map_, Map& item_map_);
+	void CheckToMap(Map& main_map_, Map& item_map_);
 	void BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_);
 	void BombExplode(SDL_Renderer* des, Bomb* bomb_, Map& main_map_, Map& item_map_);
 	void IncreaseBombPower() { bomb_power++; }
-	void ExplodeShow();
-
-
-
+	void IncreaseBombLimit() { bomb_limit++; }
+	void IncreasePlayerSpeed() { player_speed ++; }
 
 private:
+	int bomb_limit;
 	int bomb_power;
+	int player_speed;
 	std::vector<Bomb*> pbomb_list;
 
 	float x_val;

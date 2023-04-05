@@ -7,22 +7,14 @@ void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
 	fopen_s(&fp1, name_game_map, "rb");
 	fopen_s(&fp2, name_item_map, "rb");
 
-	//main_map_.max_x = 0; 
-	//main_map_.max_y = 0;
-
 	for (int i = 0; i < MAX_MAP_Y; i++)
 	{
 		for (int j = 0; j < MAX_MAP_X; j++)
 		{
 			fscanf_s(fp1, "%d", &main_map_.tile_map[i][j]);
 			fscanf_s(fp2, "%d", &item_map_.tile_map[i][j]);
-
-			//main_map_.max_x = (j > main_map_.max_x) ? j : main_map_.max_x;
-			//main_map_.max_y = (i > main_map_.max_y) ? i : main_map_.max_y;
 		}
 	}
-	//main_map_.max_x = (main_map_.max_x + 1) * TILE_SIZE;
-	//main_map_.max_y = (main_map_.max_y + 1) * TILE_SIZE;
 
 	main_map_.start_x = 0; 
 	main_map_.start_y = 0;

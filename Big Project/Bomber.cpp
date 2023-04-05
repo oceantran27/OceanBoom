@@ -1,6 +1,5 @@
 #include "Bomber.h"
 
-#define PLAYER_SPEED 5
 #define LIMIT_LAG 14
 
 
@@ -8,10 +7,12 @@ Bomber::Bomber()
 {
 	frame = 0;
 
+	bomb_limit = 1;
 	bomb_power = 1;
+	player_speed = 3.5;
 
-	x_pos = TILE_SIZE;
-	y_pos = TILE_SIZE*3;
+	x_pos = TILE_SIZE * 9;
+	y_pos = TILE_SIZE * 5;
 
 	x_val = 0;
 	y_val = 0;
@@ -181,24 +182,27 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& main
 
 		case SDLK_SPACE:
 		{
-			int x, y;
-			if (status == WALK_LEFT)
+			if (pbomb_list.size() < bomb_limit)
 			{
-				x = ((x_pos + width_frame - ERROR_NUM) / TILE_SIZE);
-			}
-			else
-			{
-				x = ((x_pos + ERROR_NUM) / TILE_SIZE);
-			}
+				int x, y;
+				if (status == WALK_LEFT)
+				{
+					x = ((x_pos + width_frame - ERROR_NUM) / TILE_SIZE);
+				}
+				else
+				{
+					x = ((x_pos + ERROR_NUM) / TILE_SIZE);
+				}
 				y = ((y_pos + 0.7 * height_frame - ERROR_NUM) / TILE_SIZE);
 
-			if (main_map_.tile_map[y][x] == BLANK_TILE)
-			{
-				Bomb* pbomb = new Bomb();
-				pbomb->SetScreen(screen);
-				pbomb->Plant(x, y);
-				pbomb_list.push_back(pbomb);
-				main_map_.tile_map[y][x] = BOMB_PLANTED;
+				if (main_map_.tile_map[y][x] == BLANK_TILE)
+				{
+					Bomb* pbomb = new Bomb();
+					pbomb->SetScreen(screen);
+					pbomb->Plant(x, y);
+					pbomb_list.push_back(pbomb);
+					main_map_.tile_map[y][x] = BOMB_PLANTED;
+				}
 			}
 		}
 		break;
@@ -206,30 +210,30 @@ void Bomber::HandleInputAction(SDL_Event &event, SDL_Renderer* screen, Map& main
 	}
 }
 
-void Bomber::HandleMove(Map& main_map_)
+void Bomber::HandleMove(Map& main_map_, Map& item_map_)
 {
 	x_val = 0;
 	y_val = 0;
 	if (input_type.left == 1)
 	{
-		x_val -= PLAYER_SPEED;
+		x_val -= player_speed;
 	}
 	else if (input_type.right == 1)
 	{
-		x_val += PLAYER_SPEED;
+		x_val += player_speed;
 	}
 	else if (input_type.up == 1)
 	{
-		y_val -= PLAYER_SPEED;
+		y_val -= player_speed;
 	}
 	else if (input_type.down == 1)
 	{
-		y_val += PLAYER_SPEED;
+		y_val += player_speed;
 	}
-	CheckToMap(main_map_);
+	CheckToMap(main_map_, item_map_);
 }
 
-void Bomber::CheckToMap(Map& main_map_)
+void Bomber::CheckToMap(Map& main_map_, Map& item_map_)
 {
 	int old_x_pos = x_pos;
 	int old_y_pos = y_pos;
@@ -240,36 +244,38 @@ void Bomber::CheckToMap(Map& main_map_)
 	int x1, x2;
 	int y1, y2;
 
+	//Check for collision of player and obstacles
+
 	x1 = (x_pos + ERROR_NUM) / TILE_SIZE;
 	x2 = (x_pos + width_frame - ERROR_NUM) / TILE_SIZE;
 
 	y1 = (y_pos + ERROR_NUM) / TILE_SIZE;
 	y2 = (y_pos + height_frame - ERROR_NUM) / TILE_SIZE;
 
-	int top_right = main_map_.tile_map[y1][x2];
-	int bot_right = main_map_.tile_map[y2][x2];
-	int top_left = main_map_.tile_map[y1][x1];
-	int bot_left = main_map_.tile_map[y2][x1];
+	int main_top_right = main_map_.tile_map[y1][x2];
+	int main_bot_right = main_map_.tile_map[y2][x2];
+	int main_top_left = main_map_.tile_map[y1][x1];
+	int main_bot_left = main_map_.tile_map[y2][x1];
 	
-	bool check_top_right = top_right != BLANK_TILE && top_right != BOMB_PLANTED;
-	bool check_top_left = top_left != BLANK_TILE && top_left != BOMB_PLANTED;
-	bool check_bot_right = bot_right != BLANK_TILE && bot_right != BOMB_PLANTED;
-	bool check_bot_left = bot_left != BLANK_TILE && bot_left != BOMB_PLANTED ;
+	bool check_main_top_right = main_top_right != BLANK_TILE && main_top_right != BOMB_PLANTED;
+	bool check_main_top_left = main_top_left != BLANK_TILE && main_top_left != BOMB_PLANTED;
+	bool check_main_bot_right = main_bot_right != BLANK_TILE && main_bot_right != BOMB_PLANTED;
+	bool check_main_bot_left = main_bot_left != BLANK_TILE && main_bot_left != BOMB_PLANTED;
 
 	if (x_val > 0)
 	{
-		if (check_top_right || check_bot_right)
+		if (check_main_top_right || check_main_bot_right)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
 			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
-			if (foot_lag_part  <= LIMIT_LAG && foot_lag_part >= 0 
-				&& check_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_TILE)
+			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
+				&& check_main_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_TILE)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
 				int y3 = y_pos / TILE_SIZE;
 			}
-			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0 
-				&& check_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_TILE)
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
+				&& check_main_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_TILE)
 			{
 				y_pos += head_lag_part + ERROR_NUM;
 			}
@@ -279,20 +285,21 @@ void Bomber::CheckToMap(Map& main_map_)
 				x_val = 0;
 			}
 		}
+
 	}
 	else if (x_val < 0)
 	{
-		if (check_top_left || check_bot_left)
+		if (check_main_top_left || check_main_bot_left)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
 			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
-			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0 
-				&& check_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_TILE)
+			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
+				&& check_main_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_TILE)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
 			}
-			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0 
-				&& check_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_TILE)
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
+				&& check_main_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_TILE)
 			{
 				y_pos += head_lag_part + ERROR_NUM;
 			}
@@ -306,17 +313,17 @@ void Bomber::CheckToMap(Map& main_map_)
 
 	if (y_val > 0)
 	{
-		if (check_bot_right || check_bot_left)
+		if (check_main_bot_right || check_main_bot_left)
 		{
 			int foot_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
 			int foot_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
-			if (foot_left_lag_part <= LIMIT_LAG && foot_left_lag_part >= 0 
-				&& check_bot_left && main_map_.tile_map[y1 + 1][x2] == BLANK_TILE)
+			if (foot_left_lag_part <= LIMIT_LAG && foot_left_lag_part >= 0
+				&& check_main_bot_left && main_map_.tile_map[y1 + 1][x2] == BLANK_TILE)
 			{
 				x_pos += foot_left_lag_part + ERROR_NUM;
 			}
-			else if (foot_right_lag_part <= LIMIT_LAG && foot_right_lag_part > 0 
-				&& check_bot_right && main_map_.tile_map[y1 + 1][x1] == BLANK_TILE)
+			else if (foot_right_lag_part <= LIMIT_LAG && foot_right_lag_part > 0
+				&& check_main_bot_right && main_map_.tile_map[y1 + 1][x1] == BLANK_TILE)
 			{
 				x_pos -= foot_right_lag_part + ERROR_NUM;
 			}
@@ -329,17 +336,17 @@ void Bomber::CheckToMap(Map& main_map_)
 	}
 	else if (y_val < 0)
 	{
-		if (check_top_right || check_top_left)
+		if (check_main_top_right || check_main_top_left)
 		{
 			int head_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
 			int head_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
-			if (head_left_lag_part <= LIMIT_LAG && head_left_lag_part >= 0 
-				&& check_top_left && main_map_.tile_map[y2 - 1][x2] == BLANK_TILE)
+			if (head_left_lag_part <= LIMIT_LAG && head_left_lag_part >= 0
+				&& check_main_top_left && main_map_.tile_map[y2 - 1][x2] == BLANK_TILE)
 			{
 				x_pos += head_left_lag_part + ERROR_NUM;
 			}
-			else if (head_right_lag_part <= LIMIT_LAG && head_right_lag_part > 0 
-				&& check_top_right && main_map_.tile_map[y2 - 1][x1] == BLANK_TILE)
+			else if (head_right_lag_part <= LIMIT_LAG && head_right_lag_part > 0
+				&& check_main_top_right && main_map_.tile_map[y2 - 1][x1] == BLANK_TILE)
 			{
 				x_pos -= head_right_lag_part + ERROR_NUM;
 			}
@@ -351,6 +358,50 @@ void Bomber::CheckToMap(Map& main_map_)
 		}
 	}
 
+
+	//Check for collision of player and items
+	x1 = (x_pos + 3*ERROR_NUM) / TILE_SIZE;
+	x2 = (x_pos + width_frame - 3*ERROR_NUM) / TILE_SIZE;
+
+	y1 = (y_pos + 3*ERROR_NUM) / TILE_SIZE;
+	y2 = (y_pos + height_frame - 3*ERROR_NUM) / TILE_SIZE;
+
+	int item_top_right = item_map_.tile_map[y1][x2];
+	int item_bot_right = item_map_.tile_map[y2][x2];
+	int item_top_left = item_map_.tile_map[y1][x1];
+	int item_bot_left = item_map_.tile_map[y2][x1];
+
+	if (item_top_left == BOMB_UP || item_bot_left == BOMB_UP || item_top_right == BOMB_UP || item_bot_right == BOMB_UP)
+	{
+		IncreaseBombLimit();
+	}
+	if (item_top_left == POWER_UP || item_bot_left == POWER_UP || item_top_right == POWER_UP || item_bot_right == POWER_UP)
+	{
+		IncreaseBombPower();
+	}
+	if (item_top_left == SPEED_UP || item_bot_left == SPEED_UP || item_top_right == SPEED_UP || item_bot_right == SPEED_UP)
+	{
+		IncreasePlayerSpeed();
+	}
+
+	if (item_top_left != BLANK_ITEM)
+	{
+		item_map_.tile_map[y1][x1] = BLANK_ITEM;
+	}
+	if (item_bot_left != BLANK_ITEM)
+	{
+		item_map_.tile_map[y2][x1] = BLANK_ITEM;
+	}
+	if (item_top_right != BLANK_ITEM)
+	{
+		item_map_.tile_map[y1][x2] = BLANK_ITEM;
+	}
+	if (item_bot_right != BLANK_ITEM)
+	{
+		item_map_.tile_map[y2][x2] = BLANK_ITEM;
+	}
+
+	//Check for collision of player and bombs 
 	if (pbomb_list.size() != 0)
 	{
 		for (auto bomb : pbomb_list)
@@ -377,106 +428,109 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 	int x = bomb_->GetX();
 	int y = bomb_->GetY(); 
 
-	for (int i = -1; i >= -bomb_power; i--) 
+	if (bomb_->GetLim())
 	{
-		int x1 = x + i;
-
-		if (main_map_.tile_map[y][x1] == LIMIT_TILE)
+		for (int i = -1; i >= -bomb_power; i--)
 		{
-			break;
+			int x1 = x + i;
+
+			if (main_map_.tile_map[y][x1] == LIMIT_TILE)
+			{
+				break;
+			}
+
+			bomb_->SetLeft(i);
+
+			if (main_map_.tile_map[y][x1] != BLANK_TILE &&
+				main_map_.tile_map[y][x1] != BLOCK_TILE &&
+				main_map_.tile_map[y][x1] != BOMB_PLANTED)
+			{
+				main_map_.tile_map[y][x1] = BLANK_TILE;
+				break;
+			}
+
+			if (item_map_.tile_map[y][x1] != BLANK_ITEM)
+			{
+				item_map_.tile_map[y][x1] = BLANK_ITEM;
+			}
 		}
 
-		bomb_->SetLeft(i);
-
-		if (main_map_.tile_map[y][x1] != BLANK_TILE &&
-			main_map_.tile_map[y][x1] != BLOCK_TILE &&
-			main_map_.tile_map[y][x1] != BOMB_PLANTED)
+		for (int i = 1; i <= bomb_power; i++)
 		{
-			main_map_.tile_map[y][x1] = BLANK_TILE;
-			break;
+			int x1 = x + i;
+
+			if (main_map_.tile_map[y][x1] == LIMIT_TILE)
+			{
+				break;
+			}
+
+			bomb_->SetRight(i);
+
+			if (main_map_.tile_map[y][x1] != BLANK_TILE &&
+				main_map_.tile_map[y][x1] != BLOCK_TILE &&
+				main_map_.tile_map[y][x1] != BOMB_PLANTED)
+			{
+				main_map_.tile_map[y][x1] = BLANK_TILE;
+				break;
+			}
+
+			if (item_map_.tile_map[y][x1] != BLANK_ITEM)
+			{
+				item_map_.tile_map[y][x1] = BLANK_ITEM;
+			}
 		}
 
-		if (item_map_.tile_map[y][x1] != BLANK_TILE)
+		for (int i = -1; i >= -bomb_power; i--)
 		{
-			item_map_.tile_map[y][x1] = -1;
+			int y1 = y + i;
+
+			if (main_map_.tile_map[y1][x] == LIMIT_TILE)
+			{
+				break;
+			}
+
+			bomb_->SetTop(i);
+
+			if (main_map_.tile_map[y1][x] != BLANK_TILE &&
+				main_map_.tile_map[y1][x] != BLOCK_TILE &&
+				main_map_.tile_map[y1][x] != BOMB_PLANTED)
+			{
+				main_map_.tile_map[y1][x] = BLANK_TILE;
+				break;
+			}
+
+			if (item_map_.tile_map[y1][x] != BLANK_ITEM)
+			{
+				item_map_.tile_map[y1][x] = BLANK_ITEM;
+			}
 		}
+
+		for (int i = 1; i <= bomb_power; i++)
+		{
+			int y1 = y + i;
+
+			if (main_map_.tile_map[y1][x] == LIMIT_TILE)
+			{
+				break;
+			}
+
+			bomb_->SetBot(i);
+
+			if (main_map_.tile_map[y1][x] != BLANK_TILE &&
+				main_map_.tile_map[y1][x] != BLOCK_TILE &&
+				main_map_.tile_map[y1][x] != BOMB_PLANTED)
+			{
+				main_map_.tile_map[y1][x] = BLANK_TILE;
+				break;
+			}
+
+			if (item_map_.tile_map[y1][x] != BLANK_ITEM)
+			{
+				item_map_.tile_map[y1][x] = BLANK_ITEM;
+			}
+		}
+		bomb_->SetLim(false);
 	}
-
-	for (int i = 1; i <= bomb_power; i++) 
-	{
-		int x1 = x + i;
-
-		if (main_map_.tile_map[y][x1] == LIMIT_TILE)
-		{
-			break;
-		}
-
-		bomb_->SetRight(i);
-
-		if (main_map_.tile_map[y][x1] != BLANK_TILE &&
-			main_map_.tile_map[y][x1] != BLOCK_TILE &&
-			main_map_.tile_map[y][x1] != BOMB_PLANTED)
-		{
-			main_map_.tile_map[y][x1] = BLANK_TILE;
-			break;
-		}
-
-		if (item_map_.tile_map[y][x1] != BLANK_TILE)
-		{
-			item_map_.tile_map[y][x1] = -1;
-		}
-	}
-
-	for (int i = -1; i >= -bomb_power; i--) 
-	{
-		int y1 = y + i;
-
-		if (main_map_.tile_map[y1][x] == LIMIT_TILE)
-		{
-			break;
-		}
-
-		bomb_->SetTop(i);
-
-		if (main_map_.tile_map[y1][x] != BLANK_TILE &&
-			main_map_.tile_map[y1][x] != BLOCK_TILE &&
-			main_map_.tile_map[y1][x] != BOMB_PLANTED)
-		{
-			main_map_.tile_map[y1][x] = BLANK_TILE;
-			break;
-		}
-
-		if (item_map_.tile_map[y1][x] != BLANK_TILE)
-		{
-			item_map_.tile_map[y1][x] = -1;
-		}
-	}
-
-	for (int i = 1; i <= bomb_power; i++) 
-	{
-		int y1 = y + i;
-
-		if (main_map_.tile_map[y1][x] == LIMIT_TILE)
-		{
-			break;
-		}
-
-		bomb_->SetBot(i);
-
-		if (main_map_.tile_map[y1][x] != BLANK_TILE &&
-			main_map_.tile_map[y1][x] != BLOCK_TILE &&
-			main_map_.tile_map[y1][x] != BOMB_PLANTED)
-		{
-			main_map_.tile_map[y1][x] = BLANK_TILE;
-			break;
-		}
-
-		if (item_map_.tile_map[y1][x] != BLANK_TILE)
-		{
-			item_map_.tile_map[y1][x] = -1;
-		}
-	}
-
 	bomb_->DisplayExplosion(des);
 }
 

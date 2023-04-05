@@ -6,6 +6,7 @@
 
 Bomb::Bomb()
 {
+	lim = true;
 	timer_exist_bomb = 0;
 	frame = 0;
 	max_right = 0;

@@ -15,26 +15,38 @@ public:
 	Bomb();
 	~Bomb();
 	
-	void Plant( const int& xPos, const int& yPos);
 	SDL_TimerID GetBombTimer() const { return timer_exist_bomb; }
 	SDL_TimerID GetExplosionTimer() const { return timer_explode; }
-	void SetClip();
-	bool LoadClipImg(std::string path);
+
+	void Plant( const int& xPos, const int& yPos);
+
 	void DisplayBomb(SDL_Renderer* des);
 	void DisplayExplosion(SDL_Renderer* des);
+	bool LoadClipImg(std::string path);
+	void SetScreen(SDL_Renderer* screen_) { screen = screen_; }
+	void SetClip();
+
 	int GetX() const { return x; }
 	int GetY() const { return y; }
-	void SetScreen(SDL_Renderer* screen_) { screen = screen_; }
+
 	void SetRight(const int& right) { max_right = right; }
 	void SetLeft(const int& left) { max_left = left; }
 	void SetTop(const int& top) { max_top = top; }
 	void SetBot(const int& bot) { max_bot = bot; }
 
+	void SetLim(const bool& lim_) { lim = lim_; }
+	bool GetLim() const { return lim; }
+
 private:
+	void StartTimer();
+
+	//Limit the number of times the bomb explodes
+	bool lim;
 
 	int x;
 	int y;
 
+	//Maximum length of bomb when colliding with other objects
 	int max_right;
 	int max_left;
 	int max_top;
@@ -44,8 +56,6 @@ private:
 	int width_frame;
 	int height_frame;
 	SDL_Rect frame_clip[BOMB_FRAMES];
-
-	void StartTimer();
 
 	SDL_TimerID timer_exist_bomb;
 	SDL_TimerID timer_explode;

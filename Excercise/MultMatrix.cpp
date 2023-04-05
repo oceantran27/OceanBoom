@@ -13,8 +13,14 @@ int main()
 	vector<vector<int>> matrix1, matrix2, r_matrix;
 	matrix1 = readMatrix();
 	matrix2 = readMatrix();
-	r_matrix = multMatrix(matrix1, matrix2);
-	printMatrix(r_matrix);
+	for (int i = 2; i <= 10; i++)
+	{
+		r_matrix = multMatrix(matrix1, matrix2);
+		matrix1 = r_matrix;
+		cout << "mu " << i << ":" << endl;
+		printMatrix(r_matrix);
+	}
+
 	return 0;
 }
 
@@ -40,7 +46,6 @@ vector<vector<int>> multMatrix(vector<vector<int>> matrix1, vector<vector<int>> 
 	m = matrix1.size();
 	n = matrix2.size();
 	vector<vector<int>> r_matrix;
-		
 	for (int i = 0; i < m; i++)
 	{
 		r_matrix.push_back(vector<int>());
@@ -59,7 +64,7 @@ vector<vector<int>> multMatrix(vector<vector<int>> matrix1, vector<vector<int>> 
 
 void printMatrix(vector<vector<int>> matrix)
 {
-	cout << endl;
+
 	for(auto i: matrix)
 	{
 		for (auto j: i)
@@ -68,4 +73,5 @@ void printMatrix(vector<vector<int>> matrix)
 		}
 		cout << endl;
 	}
+		cout << endl;
 }
