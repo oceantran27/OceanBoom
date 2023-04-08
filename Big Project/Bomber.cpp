@@ -1,7 +1,5 @@
 #include "Bomber.h"
 
-#define LIMIT_LAG 14
-
 
 Bomber::Bomber()
 {
@@ -9,10 +7,7 @@ Bomber::Bomber()
 
 	bomb_limit = 1;
 	bomb_power = 1;
-	player_speed = 3.5;
-
-	x_pos = TILE_SIZE * 9;
-	y_pos = TILE_SIZE * 5;
+	player_speed = 4;
 
 	x_val = 0;
 	y_val = 0;
@@ -20,17 +15,19 @@ Bomber::Bomber()
 	width_frame = 0;
 	height_frame = 0;
 
-	status = -1;
+	status = WALK_NONE;
 	input_type.left = 0;
 	input_type.right = 0;
 	input_type.up = 0;
 	input_type.down = 0;
 
+	x_pos = 0;
+	y_pos = 0;
 }
 
 Bomber::~Bomber()
 {
-
+	pbomb_list.clear();
 }
 
 bool Bomber::LoadClipImg(std::string path, SDL_Renderer* screen)
@@ -63,21 +60,25 @@ void Bomber::SetClip()
 
 void Bomber::BomberShow(SDL_Renderer* des)
 {
-	if (status == WALK_LEFT)
+	if (status == WALK_NONE)
 	{
-		LoadClipImg("Images/left.png", des);
+		LoadClipImg("Bomber/down.png", des);
+	}
+	else if (status == WALK_LEFT)
+	{
+		LoadClipImg("Bomber/left.png", des);
 	}
 	else if (status == WALK_RIGHT)
 	{
-		LoadClipImg("Images/right.png", des);
+		LoadClipImg("Bomber/right.png", des);
 	}
 	else if (status == WALK_UP)
 	{
-		LoadClipImg("Images/up.png", des);
+		LoadClipImg("Bomber/up.png", des);
 	}
 	else if (status == WALK_DOWN)
 	{
-		LoadClipImg("Images/down.png", des);
+		LoadClipImg("Bomber/down.png", des);
 	}
 
 	if (input_type.left == 1 ||
@@ -262,6 +263,7 @@ void Bomber::CheckToMap(Map& main_map_, Map& item_map_)
 	bool check_main_bot_right = main_bot_right != BLANK_TILE && main_bot_right != BOMB_PLANTED;
 	bool check_main_bot_left = main_bot_left != BLANK_TILE && main_bot_left != BOMB_PLANTED;
 
+	//move right
 	if (x_val > 0)
 	{
 		if (check_main_top_right || check_main_bot_right)
@@ -287,6 +289,7 @@ void Bomber::CheckToMap(Map& main_map_, Map& item_map_)
 		}
 
 	}
+	//move left
 	else if (x_val < 0)
 	{
 		if (check_main_top_left || check_main_bot_left)
@@ -310,7 +313,7 @@ void Bomber::CheckToMap(Map& main_map_, Map& item_map_)
 			}
 		}
 	}
-
+	//move up
 	if (y_val > 0)
 	{
 		if (check_main_bot_right || check_main_bot_left)
@@ -334,6 +337,7 @@ void Bomber::CheckToMap(Map& main_map_, Map& item_map_)
 			}
 		}
 	}
+	//move down
 	else if (y_val < 0)
 	{
 		if (check_main_top_right || check_main_top_left)
@@ -434,7 +438,7 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int x1 = x + i;
 
-			if (main_map_.tile_map[y][x1] == LIMIT_TILE)
+			if (main_map_.tile_map[y][x1] <= 10 && main_map_.tile_map[y][x1] > 0)
 			{
 				break;
 			}
@@ -459,7 +463,7 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int x1 = x + i;
 
-			if (main_map_.tile_map[y][x1] == LIMIT_TILE)
+			if (main_map_.tile_map[y][x1] <= 10 && main_map_.tile_map[y][x1] > 0)
 			{
 				break;
 			}
@@ -484,7 +488,7 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int y1 = y + i;
 
-			if (main_map_.tile_map[y1][x] == LIMIT_TILE)
+			if (main_map_.tile_map[y1][x] <= 10 && main_map_.tile_map[y1][x] > 0)
 			{
 				break;
 			}
@@ -509,7 +513,7 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int y1 = y + i;
 
-			if (main_map_.tile_map[y1][x] == LIMIT_TILE)
+			if (main_map_.tile_map[y1][x] <= 10 && main_map_.tile_map[y1][x] > 0)
 			{
 				break;
 			}

@@ -11,7 +11,7 @@ BaseObject::BaseObject()
 
 BaseObject::~BaseObject()
 {
-
+	//
 }
 
 bool BaseObject::LoadImg(std::string path, SDL_Renderer* screen)

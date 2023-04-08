@@ -2,7 +2,7 @@
 
 void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
 {
-	FILE *fp1 = NULL;
+	FILE* fp1 = NULL;
 	FILE* fp2 = NULL;
 	fopen_s(&fp1, name_game_map, "rb");
 	fopen_s(&fp2, name_item_map, "rb");
@@ -11,16 +11,16 @@ void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
 	{
 		for (int j = 0; j < MAX_MAP_X; j++)
 		{
-			fscanf_s(fp1, "%d", &main_map_.tile_map[i][j]);
-			fscanf_s(fp2, "%d", &item_map_.tile_map[i][j]);
+			fscanf_s(fp1, "%2d", &main_map_.tile_map[i][j]);
+			fscanf_s(fp2, "%2d", &item_map_.tile_map[i][j]);
 		}
 	}
 
 	main_map_.start_x = 0; 
 	main_map_.start_y = 0;
 
-	fclose(fp2);
 	fclose(fp1);
+	fclose(fp2);
 }
 
 void GameMap::LoadTiles(SDL_Renderer* screen)
@@ -29,7 +29,7 @@ void GameMap::LoadTiles(SDL_Renderer* screen)
 	FILE* fp1 = NULL;
 	for (int i = 0; i < MAX_TILES; i++)
 	{
-		char numImg = i + '0';
+		std::string numImg = std::to_string(i);
 		fileImg = "Images/";
 		fileImg = fileImg + numImg;
 		fileImg = fileImg + ".png";
@@ -62,6 +62,13 @@ void GameMap::DrawMap(SDL_Renderer* screen)
 		{
 			int main_val = main_map_.tile_map[main_map_y][main_map_x];
 			int item_val = item_map_.tile_map[main_map_y][main_map_x];
+
+			if (item_val != BLANK_ITEM)
+			{
+				tiles[item_val].SetRect(j, i);
+				tiles[item_val].Render(screen);
+			}
+
 			if (main_val < BLANK_TILE)
 			{
 				main_val = BLANK_TILE;
@@ -69,11 +76,6 @@ void GameMap::DrawMap(SDL_Renderer* screen)
 			tiles[main_val].SetRect(j, i);
 			tiles[main_val].Render(screen);
 
-			if (item_val > BLANK_TILE && main_val == BLANK_TILE)
-			{
-				tiles[item_val].SetRect(j, i);
-				tiles[item_val].Render(screen);
-			}
 			main_map_x++;
 		}
 		main_map_y++;

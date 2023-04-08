@@ -37,11 +37,12 @@ public:
 	void IncreaseBombPower() { bomb_power++; }
 	void IncreaseBombLimit() { bomb_limit++; }
 	void IncreasePlayerSpeed() { player_speed ++; }
-
+	void SetSpawn(const float& x_, const float& y_) { x_pos = x_*TILE_SIZE; y_pos = y_*TILE_SIZE; }
 private:
+
 	int bomb_limit;
 	int bomb_power;
-	int player_speed;
+	float player_speed;
 	std::vector<Bomb*> pbomb_list;
 
 	float x_val;

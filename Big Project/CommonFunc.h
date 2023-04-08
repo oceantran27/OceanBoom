@@ -9,11 +9,14 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <ctime>
+#include <random>
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 
+#define LIMIT_LAG 15
 #define ERROR_NUM 1
 #define BLANK_TILE 0
 #define BLANK_ITEM -1
@@ -32,9 +35,9 @@ const int SCREEN_WIDTH = TILE_SIZE*MAX_MAP_X;
 const int SCREEN_HEIGHT = TILE_SIZE*MAX_MAP_Y;
 const int SCREEN_BPP = 64;
 
-const int COLOR_KEY_R = 5;
-const int COLOR_KEY_G = 140;
-const int COLOR_KEY_B = 60;
+const int COLOR_KEY_R = 90;
+const int COLOR_KEY_G = 182;
+const int COLOR_KEY_B = 0;
 
 
 struct Input
