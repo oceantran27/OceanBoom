@@ -105,6 +105,18 @@ void Bomb::DisplayExplosion(SDL_Renderer* des)
 	}
 }
 
+void Bomb::ClearBomb(Map& main_map_)
+{
+	for (int i = max_left; i <= max_right; i++)
+	{
+		main_map_.tile_map[y][x + i] = BLANK_TILE;
+	}
+	for (int i = max_top; i <= max_bot; i++)
+	{
+		main_map_.tile_map[y + i][x] = BLANK_TILE;
+	}
+}
+
 
 
 

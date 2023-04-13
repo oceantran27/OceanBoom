@@ -6,7 +6,7 @@
 #include "CommonFunc.h"
 #include "Map.h"
 
-#define ENEMY_FRAMES 6
+#define DEAD_TIMER 600
 
 class Enemy : public BaseObject
 {
@@ -20,7 +20,8 @@ public:
 		WALK_RIGHT = 1,
 		WALK_LEFT = 2,
 		WALK_UP = 3,
-		WALK_DOWN = 4
+		WALK_DOWN = 4,
+		DEAD = 5
 	};
 
 	void SetXVal(const float& x_val_) { x_val = x_val_; }
@@ -32,23 +33,19 @@ public:
 	float GetXPos() const { return x_pos; }
 	float GetYPos() const { return y_pos; }
 
-	//bool LoadClipImg(std::string path, SDL_Renderer* screen);
-	//void SetClip();
 	void EnemyShow(SDL_Renderer* des);
-	void HandleMove(Map& main_map_);
-	void CheckToMap(Map& main_map_);
+	void HandleMove(const float& player_x_pos, const float& player_y_pos, Map& main_map_);
+	bool CheckToMap(Map& main_map_);
 
 	int GetWidthFrame() const { return width_frame; }
 	int GetHeightFrame() const { return height_frame; }
 	void SetSpawn(const int& type_, const float& x_, const float& y_) { type = type_; x_pos = x_ * TILE_SIZE; y_pos = y_ * TILE_SIZE; }
 
 private:
-	//
-	int timer_keep_direction;
-
+	//Type of enemy
 	int type;
 
-	float enemy_speed[10] = {0, 3, 4};
+	float enemy_speed[3] = {0, 3, 3.5};
 
 	float x_val;
 	float y_val;
@@ -59,10 +56,9 @@ private:
 	int width_frame;
 	int height_frame;
 
-	//int frame;
-
-	//SDL_Rect frame_clip[ENEMY_FRAMES];
 	int status;
+
+	SDL_TimerID timer_id;
 };
 
 #endif // !ENEMY_H

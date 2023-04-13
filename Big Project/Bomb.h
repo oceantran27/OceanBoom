@@ -36,6 +36,7 @@ public:
 
 	void SetLim(const bool& lim_) { lim = lim_; }
 	bool GetLim() const { return lim; }
+	void ClearBomb(Map& main_map_);
 
 private:
 	void StartTimer();

@@ -1,4 +1,103 @@
 #include "Enemy.h"
+#include <queue>
+#include <cstring>
+#include <stack>
+
+#define LIMIT_LAG 18
+
+typedef std::pair<int, int> Pair;
+
+struct Cell
+{
+	int col, row;
+	Cell* parent;
+
+	Cell()
+	{
+		row = -1;
+		col = -1;
+		parent = nullptr;
+	}
+	Cell(int row_, int col_)
+	{
+		this->row = row_;
+		this->col = col_;
+	}
+
+};
+
+std::stack<Pair> tracePath(Cell* dest, Pair src)
+{
+	Cell* p = dest;
+	std::stack<Pair> Path;
+	while (p->row != src.first || p->col != src.second)
+	{
+		Path.push(std::make_pair(p->row, p->col));
+		Cell* tmp = p;
+		p = p->parent;
+		delete(tmp);
+	}
+
+	//std:: cout << p->row << " " << p->col << " " << Path.top().first << " " << Path.top().second<<  std::endl;
+	return Path;
+}
+
+bool isValid(int row, int col)
+{
+	return (row >= 0) && (row < MAX_MAP_Y)
+		&& (col >= 0) && (col < MAX_MAP_X);
+}
+
+bool isUnBlocked(int grid[][MAX_MAP_X], int row, int col)
+{
+	return grid[row][col] == 0;
+}
+
+Pair bfs(int grid[][MAX_MAP_X], Pair src, Pair dest)
+{
+	bool visit[MAX_MAP_Y][MAX_MAP_X];
+	memset(visit, false, sizeof(visit));
+	std::queue<Cell*> neighbor;
+	Cell* pSrc = new Cell(src.first, src.second);
+	neighbor.push(pSrc);
+	visit[src.first][src.second] = true;
+	while (!neighbor.empty())
+	{
+		Cell* current = neighbor.front();
+		neighbor.pop();
+
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				if ((i == 0 && j == 0) || (i != 0 && j != 0))
+				{
+					continue;
+				}
+				if (isValid(current->row + i, current->col + j))
+				{
+					if (!visit[current->row + i][current->col + j] && isUnBlocked(grid, current->row + i, current->col + j))
+					{
+						Cell* child = new Cell(current->row + i, current->col + j);
+						child->parent = current;
+						neighbor.push(child);
+						visit[child->row][child->col] = true;
+
+						if (visit[dest.first][dest.second])
+						{
+							//std::cout << "success\n";
+							Pair tmp = tracePath(child, src).top();
+							//std::cout << tmp.first << " " << tmp.second << std::endl;
+							return tmp;
+						}
+					}
+				}
+			}
+		}
+	}
+	return std::make_pair(-1, -1);
+}
+
 
 Enemy::Enemy()
 {
@@ -16,8 +115,7 @@ Enemy::Enemy()
 	//frame = 0;
 	type = -1;
 
-	status = 0;
-	timer_keep_direction = 0;
+	status = WALK_DOWN;
 }
 
 Enemy::~Enemy()
@@ -78,6 +176,10 @@ void Enemy::EnemyShow(SDL_Renderer* des)
 		{
 			LoadImg("Enemy/1_Down.png", des);
 		}
+		else if (status == DEAD)
+		{
+			LoadImg("Enemy/1_Dead.png", des);
+		}
 		break;
 
 	case 2:
@@ -100,6 +202,10 @@ void Enemy::EnemyShow(SDL_Renderer* des)
 		else if (status == WALK_DOWN)
 		{
 			LoadImg("Enemy/2_Down.png", des);
+		}
+		else if (status == DEAD)
+		{
+			LoadImg("Enemy/2_Dead.png", des);
 		}
 		break;
 
@@ -124,6 +230,10 @@ void Enemy::EnemyShow(SDL_Renderer* des)
 		{
 			LoadImg("Enemy/3_Down.png", des);
 		}
+		else if (status == DEAD)
+		{
+			LoadImg("Enemy/3_Dead.png", des);
+		}
 		break;
 	}
 
@@ -136,7 +246,7 @@ void Enemy::EnemyShow(SDL_Renderer* des)
 	SDL_RenderCopy(des, pObject, NULL, &renderQuad);
 }
 
-void Enemy::CheckToMap(Map& main_map_)
+bool Enemy::CheckToMap(Map& main_map_)
 {
 	int old_x_pos = x_pos;
 	int old_y_pos = y_pos;
@@ -170,9 +280,25 @@ void Enemy::CheckToMap(Map& main_map_)
 	{
 		if (check_main_top_right || check_main_bot_right)
 		{
+			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
+			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
+			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
+				&& check_main_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_TILE)
+			{
+				y_pos -= foot_lag_part + ERROR_NUM;
+				int y3 = y_pos / TILE_SIZE;
+			}
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
+				&& check_main_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_TILE)
+			{
+				y_pos += head_lag_part + ERROR_NUM;
+			}
+			else
+			{
 				x_pos = old_x_pos;
 				x_val = 0;
-				status = WALK_LEFT;
+				return false;
+			}
 		}
 	}
 	//move left
@@ -180,19 +306,50 @@ void Enemy::CheckToMap(Map& main_map_)
 	{
 		if (check_main_top_left || check_main_bot_left)
 		{
+			int foot_lag_part = y_pos + height_frame - (y1 + 1) * TILE_SIZE;
+			int head_lag_part = (y1 + 1) * TILE_SIZE - y_pos;
+			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
+				&& check_main_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_TILE)
+			{
+				y_pos -= foot_lag_part + ERROR_NUM;
+			}
+			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
+				&& check_main_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_TILE)
+			{
+				y_pos += head_lag_part + ERROR_NUM;
+			}
+			else
+			{
 				x_pos = old_x_pos;
 				x_val = 0;
-				status = WALK_RIGHT;
+				return false;
+			}
 		}
 	}
 	//move up
-	else if (y_val > 0)
+	if (y_val > 0)
 	{
 		if (check_main_bot_right || check_main_bot_left)
 		{
+			int foot_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
+			int foot_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
+			if (foot_left_lag_part <= LIMIT_LAG && foot_left_lag_part >= 0
+				&& check_main_bot_left && main_map_.tile_map[y1 + 1][x2] == BLANK_TILE)
+			{
+				x_pos += foot_left_lag_part + ERROR_NUM;
+			}
+			else if (foot_right_lag_part <= LIMIT_LAG && foot_right_lag_part > 0
+				&& check_main_bot_right && main_map_.tile_map[y1 + 1][x1] == BLANK_TILE)
+			{
+				x_pos -= foot_right_lag_part + ERROR_NUM;
+			}
+			else
+			{
 				y_pos = old_y_pos;
 				y_val = 0;
-				status = WALK_DOWN;
+
+				return false;
+			}
 		}
 	}
 	//move down
@@ -200,42 +357,104 @@ void Enemy::CheckToMap(Map& main_map_)
 	{
 		if (check_main_top_right || check_main_top_left)
 		{
+			int head_right_lag_part = x_pos + width_frame - (x1 + 1) * TILE_SIZE;
+			int head_left_lag_part = (x1 + 1) * TILE_SIZE - x_pos;
+			if (head_left_lag_part <= LIMIT_LAG && head_left_lag_part >= 0
+				&& check_main_top_left && main_map_.tile_map[y2 - 1][x2] == BLANK_TILE)
+			{
+				x_pos += head_left_lag_part + ERROR_NUM;
+			}
+			else if (head_right_lag_part <= LIMIT_LAG && head_right_lag_part > 0
+				&& check_main_top_right && main_map_.tile_map[y2 - 1][x1] == BLANK_TILE)
+			{
+				x_pos -= head_right_lag_part + ERROR_NUM;
+			}
+			else
+			{
 				y_pos = old_y_pos;
 				y_val = 0;
-				status = WALK_UP;
+				return false;
+			}
 		}
 	}
+
+	return true;
 }
 
-void Enemy::HandleMove(Map& main_map_)
+void Enemy::HandleMove(const float& bomber_x_pos, const float& bomber_y_pos, Map& main_map_)
 {
-	timer_keep_direction++;
 	x_val = 0;
 	y_val = 0;
 
 	srand(SDL_GetTicks());
-	int random_number = 20 + rand() % 50;
-	if (timer_keep_direction > random_number)
+
+	if (status == WALK_LEFT)
 	{
-		status = rand() % 4 + 1;
-		timer_keep_direction = 0;
+		x_val -= enemy_speed[type];
 	}
-		if (status == WALK_LEFT)
+	else if (status == WALK_RIGHT)
+	{
+		x_val += enemy_speed[type];
+	}
+	else if (status == WALK_UP)
+	{
+		y_val -= enemy_speed[type];
+	}
+	else if (status == WALK_DOWN)
+	{
+		y_val += enemy_speed[type];
+	}
+
+
+	if (type == 1)
+	{
+		if (!CheckToMap(main_map_))
 		{
-			x_val -= enemy_speed[type];
+			status = rand() % 4 + 1;
 		}
-		else if (status == WALK_RIGHT)
+	}
+	else
+	{
+		int enemy_x, enemy_y;
+
+		enemy_x = x_pos  / TILE_SIZE;
+		enemy_y = y_pos / TILE_SIZE;
+
+		if (status == WALK_UP)
 		{
-			x_val += enemy_speed[type];
-		}
-		else if (status == WALK_UP)
-		{
-			y_val -= enemy_speed[type];
-		}
-		else if (status == WALK_DOWN)
-		{
-			y_val += enemy_speed[type];
+			enemy_y = (y_pos + height_frame) / TILE_SIZE;
 		}
 
+		if (status == WALK_LEFT)
+		{
+			enemy_x = (x_pos + width_frame) / TILE_SIZE;
+		}
+
+		int bomber_x = bomber_x_pos / TILE_SIZE;
+		int bomber_y = bomber_y_pos / TILE_SIZE;
+		Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(bomber_y, bomber_x));
+		if (next_step.first != -1 && next_step.second != -1)
+		{
+			int y = next_step.first;
+			int x = next_step.second;
+
+			if (x > enemy_x)
+			{
+				status = WALK_RIGHT;
+			}
+			else if (x < enemy_x)
+			{
+				status = WALK_LEFT;
+			}
+			else if (y > enemy_y)
+			{
+				status = WALK_DOWN;
+			}
+			else if (y < enemy_y)
+			{
+				status = WALK_UP;
+			}
+		}
 		CheckToMap(main_map_);
+	}
 }

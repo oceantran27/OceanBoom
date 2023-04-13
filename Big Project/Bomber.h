@@ -38,6 +38,9 @@ public:
 	void IncreaseBombLimit() { bomb_limit++; }
 	void IncreasePlayerSpeed() { player_speed ++; }
 	void SetSpawn(const float& x_, const float& y_) { x_pos = x_*TILE_SIZE; y_pos = y_*TILE_SIZE; }
+	float GetXPos() const { return x_pos; }
+	float GetYPos() const { return y_pos; }
+
 private:
 
 	int bomb_limit;

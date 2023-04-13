@@ -1,11 +1,12 @@
 #include "Bomber.h"
 
+#define LIMIT_LAG 15
 
 Bomber::Bomber()
 {
 	frame = 0;
 
-	bomb_limit = 1;
+	bomb_limit = 3;
 	bomb_power = 1;
 	player_speed = 4;
 
@@ -80,6 +81,8 @@ void Bomber::BomberShow(SDL_Renderer* des)
 	{
 		LoadClipImg("Bomber/down.png", des);
 	}
+
+	SetClip();
 
 	if (input_type.left == 1 ||
 		input_type.right == 1 ||
@@ -445,11 +448,10 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 
 			bomb_->SetLeft(i);
 
-			if (main_map_.tile_map[y][x1] != BLANK_TILE &&
-				main_map_.tile_map[y][x1] != BLOCK_TILE &&
+			if (/*main_map_.tile_map[y][x1] != BLOCK_TILE &&*/
 				main_map_.tile_map[y][x1] != BOMB_PLANTED)
 			{
-				main_map_.tile_map[y][x1] = BLANK_TILE;
+				main_map_.tile_map[y][x1] = DEAD_TILE;
 				break;
 			}
 
@@ -463,18 +465,17 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int x1 = x + i;
 
-			if (main_map_.tile_map[y][x1] <= 10 && main_map_.tile_map[y][x1] > 0)
+			if (main_map_.tile_map[y][x1] <= NUMBER_OF_LIMIT_TILE && main_map_.tile_map[y][x1] > 0)
 			{
 				break;
 			}
 
 			bomb_->SetRight(i);
 
-			if (main_map_.tile_map[y][x1] != BLANK_TILE &&
-				main_map_.tile_map[y][x1] != BLOCK_TILE &&
+			if (/*main_map_.tile_map[y][x1] != BLOCK_TILE &&*/
 				main_map_.tile_map[y][x1] != BOMB_PLANTED)
 			{
-				main_map_.tile_map[y][x1] = BLANK_TILE;
+				main_map_.tile_map[y][x1] = DEAD_TILE;
 				break;
 			}
 
@@ -495,11 +496,10 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 
 			bomb_->SetTop(i);
 
-			if (main_map_.tile_map[y1][x] != BLANK_TILE &&
-				main_map_.tile_map[y1][x] != BLOCK_TILE &&
+			if (/*main_map_.tile_map[y1][x] != BLOCK_TILE &&*/
 				main_map_.tile_map[y1][x] != BOMB_PLANTED)
 			{
-				main_map_.tile_map[y1][x] = BLANK_TILE;
+				main_map_.tile_map[y1][x] = DEAD_TILE;
 				break;
 			}
 
@@ -520,11 +520,10 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 
 			bomb_->SetBot(i);
 
-			if (main_map_.tile_map[y1][x] != BLANK_TILE &&
-				main_map_.tile_map[y1][x] != BLOCK_TILE &&
+			if (/*main_map_.tile_map[y1][x] != BLOCK_TILE &&*/
 				main_map_.tile_map[y1][x] != BOMB_PLANTED)
 			{
-				main_map_.tile_map[y1][x] = BLANK_TILE;
+				main_map_.tile_map[y1][x] = DEAD_TILE;
 				break;
 			}
 
@@ -547,14 +546,15 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		int bomb_y = pbomb_list[i]->GetY();
 		if (current_timer_id >= pbomb_list[i]->GetExplosionTimer())
 		{
-			main_map_.tile_map[bomb_y][bomb_x] = BLANK_TILE;
+			/*main_map_.tile_map[bomb_y][bomb_x] = BLANK_TILE;*/
+			pbomb_list[i]->ClearBomb(main_map_);
 			delete pbomb_list[i];
 			pbomb_list[i] = NULL;
 			pbomb_list.erase(pbomb_list.begin() + i);
 		}
 		else if (current_timer_id >= pbomb_list[i]->GetBombTimer())
 		{
-			main_map_.tile_map[bomb_y][bomb_x] = BLANK_TILE;
+			main_map_.tile_map[bomb_y][bomb_x] = DEAD_TILE;
 			BombExplode(des, pbomb_list[i], main_map_, item_map_);
 		}
 		else
@@ -563,6 +563,8 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		}
 	}
 }
+
+
 
 
 

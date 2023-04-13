@@ -16,15 +16,15 @@ static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 
-#define LIMIT_LAG 15
 #define ERROR_NUM 1
 #define BLANK_TILE 0
 #define BLANK_ITEM -1
-#define POWER_UP 5
-#define BOMB_UP 6
-#define SPEED_UP 7
+#define POWER_UP 14
+#define BOMB_UP 15
+#define SPEED_UP 16
+#define DEAD_TILE -3
 #define BLOCK_TILE -2
-#define LIMIT_TILE 1
+#define NUMBER_OF_LIMIT_TILE 10
 #define BOMB_PLANTED -1
 #define TILE_SIZE 52
 #define MAX_MAP_X 20

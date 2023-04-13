@@ -110,7 +110,6 @@ std::vector<Enemy*> InitEnemy(const int& type)
 	return list_enemies;
 }
 
-
 int main(int argc, char* argv[])
 {
 	Timer fps_time;
@@ -129,7 +128,6 @@ int main(int argc, char* argv[])
 	std::vector<Enemy*> ListEnemy = InitEnemy(1);
 
 	bool quit = false;
-	int count = 0;
 	while (!quit)
 	{
 		fps_time.Start();
@@ -153,10 +151,7 @@ int main(int argc, char* argv[])
 
 		for (auto enemy_ : ListEnemy)
 		{
-			if (count >= 5)
-			{
-				enemy_->HandleMove(gMainMap);
-			}
+			enemy_->HandleMove(pPlayer.GetXPos(), pPlayer.GetYPos(), gMainMap);
 			enemy_->EnemyShow(gScreen);
 		}
 
@@ -170,14 +165,6 @@ int main(int argc, char* argv[])
 			int delayTime = oneFrameTime - currentTime;
 			if(delayTime >= 0)
 				SDL_Delay(delayTime);
-		}
-		if (count >= 20)
-		{
-			count = 0;
-		}
-		else
-		{
-			count++;
 		}
 	}
 
