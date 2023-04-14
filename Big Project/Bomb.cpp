@@ -74,6 +74,9 @@ void Bomb::DisplayBomb(SDL_Renderer* des)
 	SDL_Rect renderQuad = { x*TILE_SIZE, y*TILE_SIZE, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
 	frame++;
+
+	current_clip = NULL;
+	delete(current_clip);
 }
 
 void Bomb::DisplayExplosion(SDL_Renderer* des)

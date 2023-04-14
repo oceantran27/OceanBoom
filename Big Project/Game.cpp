@@ -145,15 +145,17 @@ int main(int argc, char* argv[])
 		gGameMap.UpdateItemMap(gItemMap);
 		gGameMap.UpdateMainMap(gMainMap);
 
-		pPlayer.HandleMove(gMainMap,gItemMap);
-		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
-		pPlayer.BomberShow(gScreen);
-
 		for (auto enemy_ : ListEnemy)
 		{
 			enemy_->HandleMove(pPlayer.GetXPos(), pPlayer.GetYPos(), gMainMap);
 			enemy_->EnemyShow(gScreen);
 		}
+
+		pPlayer.HandleMove(gMainMap,gItemMap);
+		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
+		pPlayer.BomberShow(gScreen);
+
+
 
 		SDL_RenderPresent(gScreen);
 

@@ -21,6 +21,12 @@ void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
 
 	fclose(fp1);
 	fclose(fp2);
+
+	fp1 = NULL;
+	fp2 = NULL;
+
+	delete(fp1);
+	delete(fp2);
 }
 
 void GameMap::LoadTiles(SDL_Renderer* screen)
@@ -38,9 +44,10 @@ void GameMap::LoadTiles(SDL_Renderer* screen)
 		if (fp1 == NULL)
 			continue;
 
-		fclose(fp1);
-
 		tiles[i].LoadImg(fileImg, screen);
+		fclose(fp1);
+		fp1 = NULL;
+		delete(fp1);
 	}
 }
 

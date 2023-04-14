@@ -6,7 +6,7 @@
 #include "CommonFunc.h"
 #include "Map.h"
 
-#define DEAD_TIMER 600
+#define FREEZE_TIMER 15000
 
 class Enemy : public BaseObject
 {
@@ -16,7 +16,7 @@ public:
 
 	enum WalkType
 	{
-		WALK_NONE = 0,
+		FREEZE = 0,
 		WALK_RIGHT = 1,
 		WALK_LEFT = 2,
 		WALK_UP = 3,
@@ -36,16 +36,16 @@ public:
 	void EnemyShow(SDL_Renderer* des);
 	void HandleMove(const float& player_x_pos, const float& player_y_pos, Map& main_map_);
 	bool CheckToMap(Map& main_map_);
-
-	int GetWidthFrame() const { return width_frame; }
-	int GetHeightFrame() const { return height_frame; }
 	void SetSpawn(const int& type_, const float& x_, const float& y_) { type = type_; x_pos = x_ * TILE_SIZE; y_pos = y_ * TILE_SIZE; }
+
+	bool checkCellCollision(Map& main_map_);
+	bool checkBombCollision(Map& main_map_);
 
 private:
 	//Type of enemy
 	int type;
 
-	float enemy_speed[3] = {0, 3, 3.5};
+	float enemy_speed[4] = {0, 3, 3.5};
 
 	float x_val;
 	float y_val;
@@ -57,6 +57,9 @@ private:
 	int height_frame;
 
 	int status;
+
+	bool is_freeze;
+	bool is_dead;
 
 	SDL_TimerID timer_id;
 };

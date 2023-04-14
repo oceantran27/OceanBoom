@@ -548,6 +548,7 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		{
 			/*main_map_.tile_map[bomb_y][bomb_x] = BLANK_TILE;*/
 			pbomb_list[i]->ClearBomb(main_map_);
+			pbomb_list[i]->Free();
 			delete pbomb_list[i];
 			pbomb_list[i] = NULL;
 			pbomb_list.erase(pbomb_list.begin() + i);
@@ -561,6 +562,7 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		{
 			pbomb_list[i]->DisplayBomb(des);
 		}
+		SDL_RemoveTimer(current_timer_id);
 	}
 }
 
