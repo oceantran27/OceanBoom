@@ -4,9 +4,11 @@
 
 #include "BaseObject.h"
 #include "CommonFunc.h"
+#include "Bomber.h"
 #include "Map.h"
 
 #define FREEZE_TIMER 15000
+#define DEAD_TIMER 700
 
 class Enemy : public BaseObject
 {
@@ -16,12 +18,13 @@ public:
 
 	enum WalkType
 	{
-		FREEZE = 0,
+		WALK_NONE = 0,
 		WALK_RIGHT = 1,
 		WALK_LEFT = 2,
 		WALK_UP = 3,
 		WALK_DOWN = 4,
-		DEAD = 5
+		FREEZE = 5,
+		DEAD = 6
 	};
 
 	void SetXVal(const float& x_val_) { x_val = x_val_; }
@@ -34,12 +37,16 @@ public:
 	float GetYPos() const { return y_pos; }
 
 	void EnemyShow(SDL_Renderer* des);
-	void HandleMove(const float& player_x_pos, const float& player_y_pos, Map& main_map_);
-	bool CheckToMap(Map& main_map_);
+	void HandleMove(Bomber& pPLayer, Map& main_map_);
+	bool CheckToMap(Bomber& pPlayer, Map& main_map_);
 	void SetSpawn(const int& type_, const float& x_, const float& y_) { type = type_; x_pos = x_ * TILE_SIZE; y_pos = y_ * TILE_SIZE; }
 
-	bool checkCellCollision(Map& main_map_);
-	bool checkBombCollision(Map& main_map_);
+	bool isCollideCell(Map& main_map_);
+	bool isCollideBomb(Map& main_map_);
+	void checkDead(Bomber& pPLayer);
+
+	SDL_TimerID getTimeDead() const { return dead_time; }
+	bool isDead() const { return is_dead; }
 
 private:
 	//Type of enemy
@@ -61,7 +68,8 @@ private:
 	bool is_freeze;
 	bool is_dead;
 
-	SDL_TimerID timer_id;
+	SDL_TimerID dead_time;
+	SDL_TimerID freeze_time;
 };
 
 #endif // !ENEMY_H

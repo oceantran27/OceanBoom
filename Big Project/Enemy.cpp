@@ -2,7 +2,7 @@
 #include <queue>
 #include <cstring>
 
-#define LIMIT_LAG 18
+#define LIMIT_LAG 20
 
 typedef std::pair<int, int> Pair;
 
@@ -118,13 +118,15 @@ Enemy::Enemy()
 	type = -1;
 
 	is_freeze = false;
+	is_dead = false;
 
 	status = WALK_DOWN;
 }
 
 Enemy::~Enemy()
 {
-	//
+	SDL_RemoveTimer(freeze_time);
+	SDL_RemoveTimer(dead_time);
 }
 
 //bool Enemy::LoadClipImg(std::string path, SDL_Renderer* screen)
@@ -250,22 +252,24 @@ void Enemy::EnemyShow(SDL_Renderer* des)
 	SDL_RenderCopy(des, pObject, NULL, &renderQuad);
 }
 
-bool Enemy::CheckToMap(Map& main_map_)
+bool Enemy::CheckToMap(Bomber& pPlayer, Map& main_map_)
 {
 	x_pos += x_val;
 	y_pos += y_val;
-	if (checkBombCollision(main_map_))
+
+	if (!isCollideBomb(main_map_))
 	{
-		return checkCellCollision(main_map_);
+		return isCollideCell(main_map_);
 	}
+	return true;
 }
 
-void Enemy::HandleMove(const float& bomber_x_pos, const float& bomber_y_pos, Map& main_map_)
+void Enemy::HandleMove(Bomber& pPlayer, Map& main_map_)
 {
 	x_val = 0;
 	y_val = 0;
 
-	if (status == FREEZE)
+	if (status == FREEZE || status == DEAD)
 	{
 		x_val = 0;
 		y_val = 0;
@@ -287,76 +291,99 @@ void Enemy::HandleMove(const float& bomber_x_pos, const float& bomber_y_pos, Map
 		y_val += enemy_speed[type];
 	}
 
-	if (!is_freeze)
+	if (!is_dead)
 	{
-		if (type == 1)
+		if (!is_freeze)
 		{
-			srand(SDL_GetTicks());
-			if (!CheckToMap(main_map_))
+			if (type == 1)
 			{
-				status = rand() % 4 + 1;
+				srand(SDL_GetTicks());
+				if (!CheckToMap(pPlayer, main_map_))
+				{
+					status = rand() % 4 + 1;
+				}
+			}
+			else if (type == 2)
+			{
+				int enemy_x, enemy_y;
+
+				enemy_x = x_pos / TILE_SIZE;
+				enemy_y = y_pos / TILE_SIZE;
+
+				if (status == WALK_UP)
+				{
+					enemy_y = (y_pos + height_frame) / TILE_SIZE;
+				}
+
+				if (status == WALK_LEFT)
+				{
+					enemy_x = (x_pos + width_frame) / TILE_SIZE;
+				}
+
+				int bomber_x = pPlayer.GetXPos() / TILE_SIZE;
+				int bomber_y = pPlayer.GetYPos() / TILE_SIZE;
+				Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(bomber_y, bomber_x));
+				if (next_step.first != -1 && next_step.second != -1)
+				{
+					int y = next_step.first;
+					int x = next_step.second;
+
+					if (x > enemy_x)
+					{
+						status = WALK_RIGHT;
+					}
+					else if (x < enemy_x)
+					{
+						status = WALK_LEFT;
+					}
+					else if (y > enemy_y)
+					{
+						status = WALK_DOWN;
+					}
+					else if (y < enemy_y)
+					{
+						status = WALK_UP;
+					}
+				}
+				CheckToMap(pPlayer, main_map_);
 			}
 		}
 		else
 		{
-			int enemy_x, enemy_y;
-
-			enemy_x = x_pos / TILE_SIZE;
-			enemy_y = y_pos / TILE_SIZE;
-
-			if (status == WALK_UP)
+			status = FREEZE;
+			SDL_TimerID current_freeze_time = SDL_GetTicks();
+			if (current_freeze_time >= freeze_time)
 			{
-				enemy_y = (y_pos + height_frame) / TILE_SIZE;
+				is_freeze = false;
+				status = WALK_DOWN;
 			}
-
-			if (status == WALK_LEFT)
+			else
 			{
-				enemy_x = (x_pos + width_frame) / TILE_SIZE;
+				checkDead(pPlayer);
 			}
-
-			int bomber_x = bomber_x_pos / TILE_SIZE;
-			int bomber_y = bomber_y_pos / TILE_SIZE;
-			Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(bomber_y, bomber_x));
-			if (next_step.first != -1 && next_step.second != -1)
-			{
-				int y = next_step.first;
-				int x = next_step.second;
-
-				if (x > enemy_x)
-				{
-					status = WALK_RIGHT;
-				}
-				else if (x < enemy_x)
-				{
-					status = WALK_LEFT;
-				}
-				else if (y > enemy_y)
-				{
-					status = WALK_DOWN;
-				}
-				else if (y < enemy_y)
-				{
-					status = WALK_UP;
-				}
-			}
-			CheckToMap(main_map_);
+			SDL_RemoveTimer(current_freeze_time);
 		}
-	}
-	else
-	{
-		status = FREEZE;
-		SDL_TimerID current_timer_id = SDL_GetTicks();
-		if (current_timer_id >= timer_id)
-		{
-			is_freeze = false;
-			status = WALK_DOWN;
-		}
-		SDL_RemoveTimer(current_timer_id);
 	}
 }
 
+void Enemy::checkDead(Bomber& pPLayer)
+{
+	int center_player_x = pPLayer.GetXPos() + 0.5*pPLayer.getWidthFrame();
+	int center_player_y = pPLayer.GetYPos() + 0.5*pPLayer.getHeightFrame();
 
-bool Enemy::checkCellCollision(Map& main_map_)
+	int x1 = x_pos;
+	int x2 = x_pos + width_frame;
+	int y1 = y_pos;
+	int y2 = y_pos + height_frame;
+
+	if ((center_player_x > x1 && center_player_x < x2 && center_player_y > y1 && center_player_y < y2))
+	{
+		status = DEAD;
+		is_dead = true;
+		dead_time = SDL_GetTicks() + DEAD_TIMER;
+	}
+}
+bool Enemy::isCollideCell(Map& main_map_)
 {
 	int old_x_pos = x_pos - x_val;
 	int old_y_pos = y_pos - y_val;
@@ -488,7 +515,7 @@ bool Enemy::checkCellCollision(Map& main_map_)
 	return true;
 }
 
-bool Enemy::checkBombCollision(Map& main_map_)
+bool Enemy::isCollideBomb(Map& main_map_)
 {
 	int old_x_pos = x_pos - x_val;
 	int old_y_pos = y_pos - y_val;
@@ -516,10 +543,10 @@ bool Enemy::checkBombCollision(Map& main_map_)
 
 	if (check_main_top_right || check_main_top_left || check_main_bot_right || check_main_bot_left)
 	{
-		timer_id = SDL_GetTicks() + FREEZE_TIMER;
+		freeze_time = SDL_GetTicks() + FREEZE_TIMER;
 		is_freeze = true;
-		return false;
+		return true;
 	}
 
-	return true;
+	return false;
 }

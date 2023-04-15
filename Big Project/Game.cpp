@@ -130,6 +130,7 @@ int main(int argc, char* argv[])
 	bool quit = false;
 	while (!quit)
 	{
+
 		fps_time.Start();
 		while (SDL_PollEvent (&gEvent))
 		{
@@ -145,17 +146,28 @@ int main(int argc, char* argv[])
 		gGameMap.UpdateItemMap(gItemMap);
 		gGameMap.UpdateMainMap(gMainMap);
 
-		for (auto enemy_ : ListEnemy)
+		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
+		pPlayer.HandleMove(gMainMap, gItemMap);
+
+		for (int i = 0; i < ListEnemy.size(); i++)
 		{
-			enemy_->HandleMove(pPlayer.GetXPos(), pPlayer.GetYPos(), gMainMap);
-			enemy_->EnemyShow(gScreen);
+			SDL_TimerID current_time = SDL_GetTicks();
+			if (ListEnemy[i]->isDead() && current_time >= ListEnemy[i]->getTimeDead())
+			{
+				ListEnemy[i]->Free();
+				ListEnemy[i] = NULL;
+				delete(ListEnemy[i]);
+				ListEnemy.erase(ListEnemy.begin() + i);
+			}
+			else
+			{
+				ListEnemy[i]->HandleMove(pPlayer, gMainMap);
+				ListEnemy[i]->EnemyShow(gScreen);
+			}
+			SDL_RemoveTimer(current_time);
 		}
 
-		pPlayer.HandleMove(gMainMap,gItemMap);
-		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
 		pPlayer.BomberShow(gScreen);
-
-
 
 		SDL_RenderPresent(gScreen);
 

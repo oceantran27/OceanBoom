@@ -36,10 +36,12 @@ public:
 	void BombExplode(SDL_Renderer* des, Bomb* bomb_, Map& main_map_, Map& item_map_);
 	void IncreaseBombPower() { bomb_power++; }
 	void IncreaseBombLimit() { bomb_limit++; }
-	void IncreasePlayerSpeed() { player_speed ++; }
+	void IncreasePlayerSpeed() { player_speed += 0.75; }
 	void SetSpawn(const float& x_, const float& y_) { x_pos = x_*TILE_SIZE; y_pos = y_*TILE_SIZE; }
 	float GetXPos() const { return x_pos; }
 	float GetYPos() const { return y_pos; }
+	float getWidthFrame() const { return width_frame; }
+	float getHeightFrame() const { return height_frame; }
 
 private:
 
@@ -61,6 +63,7 @@ private:
 	SDL_Rect frame_clip[BOMBER_FRAMES];
 	Input input_type;
 	int status;
+
 };
  
 #endif // !MAIN_OBJECT_H

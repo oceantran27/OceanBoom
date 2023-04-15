@@ -6,7 +6,7 @@ Bomber::Bomber()
 {
 	frame = 0;
 
-	bomb_limit = 3;
+	bomb_limit = 1;
 	bomb_power = 1;
 	player_speed = 4;
 
@@ -532,6 +532,8 @@ void Bomber::BombExplode(SDL_Renderer* des, Bomb* bomb_,
 				item_map_.tile_map[y1][x] = BLANK_ITEM;
 			}
 		}
+
+		main_map_.tile_map[y][x] = DEAD_TILE;
 		bomb_->SetLim(false);
 	}
 	bomb_->DisplayExplosion(des);
@@ -546,11 +548,11 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		int bomb_y = pbomb_list[i]->GetY();
 		if (current_timer_id >= pbomb_list[i]->GetExplosionTimer())
 		{
-			/*main_map_.tile_map[bomb_y][bomb_x] = BLANK_TILE;*/
+			//main_map_.tile_map[bomb_y][bomb_x] = DEAD_TILE;
 			pbomb_list[i]->ClearBomb(main_map_);
 			pbomb_list[i]->Free();
-			delete pbomb_list[i];
 			pbomb_list[i] = NULL;
+			delete pbomb_list[i];
 			pbomb_list.erase(pbomb_list.begin() + i);
 		}
 		else if (current_timer_id >= pbomb_list[i]->GetBombTimer())
@@ -565,10 +567,3 @@ void Bomber::BombShow(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		SDL_RemoveTimer(current_timer_id);
 	}
 }
-
-
-
-
-
-
-
