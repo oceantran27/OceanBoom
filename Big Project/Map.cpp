@@ -1,6 +1,6 @@
 #include "Map.h"
 
-void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
+void GameMap::loadMap(const char* name_game_map, const char* name_item_map)
 {
 	FILE* fp1 = NULL;
 	FILE* fp2 = NULL;
@@ -29,7 +29,7 @@ void GameMap::LoadMap(const char* name_game_map, const char* name_item_map)
 	delete(fp2);
 }
 
-void GameMap::LoadTiles(SDL_Renderer* screen)
+void GameMap::loadTiles(SDL_Renderer* screen)
 {
 	std::string fileImg;
 	FILE* fp1 = NULL;
@@ -44,14 +44,14 @@ void GameMap::LoadTiles(SDL_Renderer* screen)
 		if (fp1 == NULL)
 			continue;
 
-		tiles[i].LoadImg(fileImg, screen);
+		tiles[i].loadImg(fileImg, screen);
 		fclose(fp1);
 		fp1 = NULL;
 		delete(fp1);
 	}
 }
 
-void GameMap::DrawMap(SDL_Renderer* screen)
+void GameMap::drawMap(SDL_Renderer* screen)
 {
 	int x1 = 0;
 	int x2 = x1 + SCREEN_WIDTH;
@@ -59,28 +59,28 @@ void GameMap::DrawMap(SDL_Renderer* screen)
 	int y1 = 0;
 	int y2 = y1 + SCREEN_HEIGHT;
 
-	int main_map_x = main_map_.start_x/TILE_SIZE;
-	int main_map_y = main_map_.start_y/TILE_SIZE;
+	int main_map_x = main_map_.start_x/CELL_SIZE;
+	int main_map_y = main_map_.start_y/CELL_SIZE;
 
-	for (int i = y1; i < y2; i += TILE_SIZE)
+	for (int i = y1; i < y2; i += CELL_SIZE)
 	{
-		main_map_x = main_map_.start_x / TILE_SIZE;
-		for (int j = x1; j < x2; j += TILE_SIZE)
+		main_map_x = main_map_.start_x / CELL_SIZE;
+		for (int j = x1; j < x2; j += CELL_SIZE)
 		{
 			int main_val = main_map_.tile_map[main_map_y][main_map_x];
 			int item_val = item_map_.tile_map[main_map_y][main_map_x];
 
 			if (item_val != BLANK_ITEM)
 			{
-				tiles[item_val].SetRect(j, i);
+				tiles[item_val].setRect(j, i);
 				tiles[item_val].Render(screen);
 			}
 
-			if (main_val < BLANK_TILE)
+			if (main_val < BLANK_CELL)
 			{
-				main_val = BLANK_TILE;
+				main_val = BLANK_CELL;
 			}
-			tiles[main_val].SetRect(j, i);
+			tiles[main_val].setRect(j, i);
 			tiles[main_val].Render(screen);
 
 			main_map_x++;

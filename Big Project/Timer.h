@@ -16,8 +16,8 @@ public:
 	void Resume();
 
 	int GetTicks();
-	bool IsPaused();
-	bool IsStarted();
+	bool isPaused();
+	bool isStarted();
 
 private:
 	int start_tick;

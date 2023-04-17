@@ -17,22 +17,22 @@ static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 
 #define ERROR_NUM 1
-#define BLANK_TILE 0
+#define NUMBER_OF_LIMIT_CELL 10
+#define BLANK_CELL 0
+#define BOMB_PLANTED -1
+#define BLOCK_CELL -2
+#define DEAD_CELL -3
 #define BLANK_ITEM -1
 #define POWER_UP 14
 #define BOMB_UP 15
 #define SPEED_UP 16
-#define DEAD_TILE -3
-#define BLOCK_TILE -2
-#define NUMBER_OF_LIMIT_TILE 10
-#define BOMB_PLANTED -1
-#define TILE_SIZE 52
+#define CELL_SIZE 52
 #define MAX_MAP_X 20
 #define MAX_MAP_Y 13
 
-const int FRAME_PER_SECOND = 24;
-const int SCREEN_WIDTH = TILE_SIZE*MAX_MAP_X;
-const int SCREEN_HEIGHT = TILE_SIZE*MAX_MAP_Y;
+const int FRAME_PER_SECOND = 22;
+const int SCREEN_WIDTH = CELL_SIZE*MAX_MAP_X;
+const int SCREEN_HEIGHT = CELL_SIZE*MAX_MAP_Y;
 const int SCREEN_BPP = 64;
 
 const int COLOR_KEY_R = 90;

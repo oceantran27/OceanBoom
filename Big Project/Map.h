@@ -19,13 +19,15 @@ public:
 	GameMap() { ; }
 	~GameMap() { ; }
 
-	void LoadMap(const char* name_game_map, const char* name_item_map);
-	void LoadTiles(SDL_Renderer* screen);
-	void DrawMap(SDL_Renderer* screen);
-	Map GetMainMap() const { return main_map_; }
-	Map GetItemMap() const { return item_map_; }
-	void UpdateMainMap(Map& main_map__) { main_map_ = main_map__; }
-	void UpdateItemMap(Map& item_map__) { item_map_ = item_map__; }
+	void loadMap(const char* name_game_map, const char* name_item_map);
+	void loadTiles(SDL_Renderer* screen);
+	void drawMap(SDL_Renderer* screen);
+
+	Map getMainMap() const { return main_map_; }
+	Map getItemMap() const { return item_map_; }
+
+	void updateMainMap(Map& main_map__) { main_map_ = main_map__; }
+	void updateItemMap(Map& item_map__) { item_map_ = item_map__; }
 
 private:
 	Map main_map_;

@@ -52,12 +52,12 @@ int Timer::GetTicks()
 	return 0;
 }
 
-bool Timer::IsStarted()
+bool Timer::isStarted()
 {
 	return is_started;
 }
 
-bool Timer::IsPaused()
+bool Timer::isPaused()
 {
 	return is_paused;
 }

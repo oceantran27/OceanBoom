@@ -2,7 +2,7 @@
 #include "BaseObject.h"
 #include "Map.h"
 #include "Bomb.h"
-#include "Bomber.h"
+#include "Player.h"
 #include "Timer.h"
 #include "Enemy.h"
 
@@ -30,6 +30,7 @@ bool InitWindow()
 
 	return true;
 }
+
 GameMap InitGameMap(const int& type)
 {
 	GameMap game_map_;
@@ -43,29 +44,30 @@ GameMap InitGameMap(const int& type)
 	name_item_map += number_game;
 	name_item_map += ".txt";
 
-	game_map_.LoadMap(name_main_map.c_str(), name_item_map.c_str());
-	game_map_.LoadTiles(gScreen);
+	game_map_.loadMap(name_main_map.c_str(), name_item_map.c_str());
+	game_map_.loadTiles(gScreen);
 
 	return game_map_;
 }
-Bomber InitBomber(const int& type)
-{
-	Bomber player_;
 
-	std::string name_bomber = "Bomber/Game_";
+Player InitPlayer(const int& type)
+{
+	Player player_;
+
+	std::string name_player = "Player/Game_";
 	char number_game = type + '0';
-	name_bomber += number_game;
-	name_bomber += ".txt";
+	name_player += number_game;
+	name_player += ".txt";
 
 	float x, y;
 	FILE* fp = NULL;
-	fopen_s(&fp, name_bomber.c_str(), "rb");
+	fopen_s(&fp, name_player.c_str(), "rb");
 	fscanf_s(fp, "%f%f", &x, &y);
 	fclose(fp);
 
-	player_.SetSpawn(x, y);
-	player_.LoadClipImg("Bomber/down.png", gScreen);
-	player_.SetClip();
+	player_.setSpawn(x, y);
+	//player_.loadClipImg("Player/down.png", gScreen);
+	//player_.setClip();
 
 	return player_;
 }
@@ -102,7 +104,7 @@ std::vector<Enemy*> InitEnemy(const int& type)
 	{
 		Enemy* enemy_ = new Enemy();
 		fscanf_s(fp, "%d%d%d", &type_enemy, &x, &y);
-		enemy_->SetSpawn(type_enemy, x, y);
+		enemy_->setSpawn(type_enemy, x, y);
 		list_enemies.push_back(enemy_);
 	}
 	fclose(fp);
@@ -120,10 +122,10 @@ int main(int argc, char* argv[])
 	}
 
 	GameMap gGameMap = InitGameMap(1);
-	Map gMainMap = gGameMap.GetMainMap();
-	Map gItemMap = gGameMap.GetItemMap();
+	Map gMainMap = gGameMap.getMainMap();
+	Map gItemMap = gGameMap.getItemMap();
 
-	Bomber pPlayer = InitBomber(1);
+	Player pPlayer = InitPlayer(1);
 
 	std::vector<Enemy*> ListEnemy = InitEnemy(1);
 
@@ -136,18 +138,19 @@ int main(int argc, char* argv[])
 		{
 			if (gEvent.type == SDL_QUIT)
 				quit = true; 
-			pPlayer.HandleInputAction(gEvent, gScreen, gMainMap);
+			pPlayer.handleInputAction(gEvent, gScreen, gMainMap);
 		}
 
 		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
 		SDL_RenderClear(gScreen);
 
-		gGameMap.DrawMap(gScreen);
-		gGameMap.UpdateItemMap(gItemMap);
-		gGameMap.UpdateMainMap(gMainMap);
+		gGameMap.drawMap(gScreen);
+		gGameMap.updateItemMap(gItemMap);
+		gGameMap.updateMainMap(gMainMap);
 
-		pPlayer.BombShow(gScreen, gMainMap, gItemMap);
-		pPlayer.HandleMove(gMainMap, gItemMap);
+		pPlayer.showBomb(gScreen, gMainMap, gItemMap);
+		pPlayer.handleMove(gMainMap, gItemMap);
+		pPlayer.showPlayer(gScreen);
 
 		for (int i = 0; i < ListEnemy.size(); i++)
 		{
@@ -161,19 +164,19 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				ListEnemy[i]->HandleMove(pPlayer, gMainMap);
-				ListEnemy[i]->EnemyShow(gScreen);
+				ListEnemy[i]->handleMove(pPlayer, gMainMap);
+				ListEnemy[i]->showEnemy(gScreen);
+				pPlayer.checkCollideEnemy(ListEnemy[i]->getRect());
 			}
 			SDL_RemoveTimer(current_time);
 		}
 
-		pPlayer.BomberShow(gScreen);
+		//if (pPlayer.getLifesRemain() <= 0) { break; }
 
 		SDL_RenderPresent(gScreen);
 
 		int currentTime = fps_time.GetTicks();
 		int oneFrameTime = 1000 / FRAME_PER_SECOND;
-
 		if (currentTime < oneFrameTime)
 		{
 			int delayTime = oneFrameTime - currentTime;
@@ -183,6 +186,7 @@ int main(int argc, char* argv[])
 	}
 
 	Close();
+
 	return 0;
 }
 

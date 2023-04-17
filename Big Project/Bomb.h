@@ -4,10 +4,12 @@
 
 #include "CommonFunc.h"
 #include "BaseObject.h"
-#include "Bomber.h"
+#include "Player.h"
 #include "Map.h"
 
 #define BOMB_FRAMES 4
+#define BOMB_EXIST_TIME 2500
+#define EXPLOSION_TIME 800
 
 class Bomb : public BaseObject
 {
@@ -15,34 +17,34 @@ public:
 	Bomb();
 	~Bomb();
 	
-	SDL_TimerID GetBombTimer() const { return timer_exist_bomb; }
-	SDL_TimerID GetExplosionTimer() const { return timer_explode; }
+	SDL_TimerID getBombTimer() const { return timer_exist_bomb; }
+	SDL_TimerID getExplosionTimer() const { return timer_explode; }
 
-	void Plant( const int& xPos, const int& yPos);
+	void plantBomb( const int& xPos, const int& yPos);
 
-	void DisplayBomb(SDL_Renderer* des);
-	void DisplayExplosion(SDL_Renderer* des);
-	bool LoadClipImg(std::string path);
-	void SetScreen(SDL_Renderer* screen_) { screen = screen_; }
-	void SetClip();
+	void displayBomb(SDL_Renderer* des);
+	void displayExplosion(SDL_Renderer* des);
+	bool loadClipImg(std::string path);
+	void setScreen(SDL_Renderer* screen_) { screen = screen_; }
+	void setClip();
 
-	int GetX() const { return x; }
-	int GetY() const { return y; }
+	int getX() const { return x; }
+	int getY() const { return y; }
 
-	void SetRight(const int& right) { max_right = right; }
-	void SetLeft(const int& left) { max_left = left; }
-	void SetTop(const int& top) { max_top = top; }
-	void SetBot(const int& bot) { max_bot = bot; }
+	void setRight(const int& right) { max_right = right; }
+	void setLeft(const int& left) { max_left = left; }
+	void setTop(const int& top) { max_top = top; }
+	void setBot(const int& bot) { max_bot = bot; }
 
-	void SetLim(const bool& lim_) { lim = lim_; }
-	bool GetLim() const { return lim; }
-	void ClearBomb(Map& main_map_);
+	void setLim(const bool& lim_) { limit_explode = lim_; }
+	bool getLim() const { return limit_explode; }
+	void clearBomb(Map& main_map_);
 
 private:
 	void StartTimer();
 
 	//Limit the number of times the bomb explodes
-	bool lim;
+	bool limit_explode;
 
 	int x;
 	int y;

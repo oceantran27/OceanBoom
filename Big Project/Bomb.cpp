@@ -1,12 +1,8 @@
 #include "Bomb.h"
 
-#define BOMB_EXIST_TIME 2500
-#define EXPLOSION_TIME 800
-
-
 Bomb::Bomb()
 {
-	lim = true;
+	limit_explode = true;
 	timer_exist_bomb = 0;
 	frame = 0;
 	max_right = 0;
@@ -21,24 +17,14 @@ Bomb::~Bomb()
 	SDL_RemoveTimer(timer_explode);
 }
 
-void Bomb::Plant(const int& x_, const int& y_) {
-    if (timer_exist_bomb == 0) {
-        StartTimer();
-		LoadClipImg("Images/bomb.png");
-		SetClip();
-		x = x_;
-		y = y_;
-    }
-}
-
 void Bomb::StartTimer() {
 	timer_exist_bomb = SDL_GetTicks() + BOMB_EXIST_TIME;
 	timer_explode = timer_exist_bomb + EXPLOSION_TIME;
 }
 
-bool Bomb::LoadClipImg(std::string path)
+bool Bomb::loadClipImg(std::string path)
 {
-	bool ret = BaseObject::LoadImg(path, screen);
+	bool ret = BaseObject::loadImg(path, screen);
 	if (ret == false)
 	{
 		return false;
@@ -50,7 +36,7 @@ bool Bomb::LoadClipImg(std::string path)
 	return true;
 }
 
-void Bomb::SetClip()
+void Bomb::setClip()
 {
 	if (width_frame > 0 && height_frame > 0)
 	{
@@ -64,14 +50,14 @@ void Bomb::SetClip()
 	}
 }
 
-void Bomb::DisplayBomb(SDL_Renderer* des)
+void Bomb::displayBomb(SDL_Renderer* des)
 {
 	if (frame >= BOMB_FRAMES)
 	{
 		frame = 0;
 	}
 	SDL_Rect* current_clip = &frame_clip[frame];
-	SDL_Rect renderQuad = { x*TILE_SIZE, y*TILE_SIZE, width_frame, height_frame };
+	SDL_Rect renderQuad = { x*CELL_SIZE, y*CELL_SIZE, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
 	frame++;
 
@@ -79,10 +65,10 @@ void Bomb::DisplayBomb(SDL_Renderer* des)
 	delete(current_clip);
 }
 
-void Bomb::DisplayExplosion(SDL_Renderer* des)
+void Bomb::displayExplosion(SDL_Renderer* des)
 {
-	SetRect(x * TILE_SIZE, y * TILE_SIZE);
-	LoadImg("Images/explode.png", screen);
+	setRect(x * CELL_SIZE, y * CELL_SIZE);
+	loadImg("Images/explode.png", screen);
 	Render(des);
 
 	for (int i = max_left; i <= max_right; i++)
@@ -91,8 +77,8 @@ void Bomb::DisplayExplosion(SDL_Renderer* des)
 		{
 			continue;
 		}
-		SetRect((x + i)*TILE_SIZE, y * TILE_SIZE);
-		LoadImg("Images/explode_x.png", screen);
+		setRect((x + i)*CELL_SIZE, y * CELL_SIZE);
+		loadImg("Images/explode_x.png", screen);
 		Render(des);
 	}
 
@@ -102,21 +88,31 @@ void Bomb::DisplayExplosion(SDL_Renderer* des)
 		{
 			continue;
 		}
-		SetRect(x * TILE_SIZE, (y + i) * TILE_SIZE);
-		LoadImg("Images/explode_y.png", screen);
+		setRect(x * CELL_SIZE, (y + i) * CELL_SIZE);
+		loadImg("Images/explode_y.png", screen);
 		Render(des);
 	}
 }
 
-void Bomb::ClearBomb(Map& main_map_)
+void Bomb::clearBomb(Map& main_map_)
 {
 	for (int i = max_left; i <= max_right; i++)
 	{
-		main_map_.tile_map[y][x + i] = BLANK_TILE;
+		main_map_.tile_map[y][x + i] = BLANK_CELL;
 	}
 	for (int i = max_top; i <= max_bot; i++)
 	{
-		main_map_.tile_map[y + i][x] = BLANK_TILE;
+		main_map_.tile_map[y + i][x] = BLANK_CELL;
+	}
+}
+
+void Bomb::plantBomb(const int& x_, const int& y_) {
+	if (timer_exist_bomb == 0) {
+		StartTimer();
+		loadClipImg("Images/bomb.png");
+		setClip();
+		x = x_;
+		y = y_;
 	}
 }
 
