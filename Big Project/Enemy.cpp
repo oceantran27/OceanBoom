@@ -55,7 +55,7 @@ bool isValid(int row, int col)
 
 bool isUnBlocked(int grid[][MAX_MAP_X], int row, int col)
 {
-	return grid[row][col] == 0;
+	return grid[row][col] == BLANK_CELL;
 }
 
 Pair bfs(int grid[][MAX_MAP_X], Pair src, Pair dest)
@@ -174,17 +174,16 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 			{
 				int enemy_x, enemy_y;
 
-				enemy_x = x_pos / CELL_SIZE;
-				enemy_y = y_pos / CELL_SIZE;
+				enemy_x = (rect.x + 0.3 * rect.w) / CELL_SIZE;
+				enemy_y = (rect.y + 0.3 * rect.w) / CELL_SIZE;
 
 				if (status == WALK_UP)
 				{
-					enemy_y = (y_pos + height_frame) / CELL_SIZE;
+					enemy_y = (rect.y + 0.7 * height_frame) / CELL_SIZE;
 				}
-
-				if (status == WALK_LEFT)
+				else if (status == WALK_LEFT)
 				{
-					enemy_x = (x_pos + width_frame) / CELL_SIZE;
+					enemy_x = (rect.x + 0.7 * width_frame) / CELL_SIZE;
 				}
 
 				int player_x = pPlayer.getXPos() / CELL_SIZE;
@@ -194,6 +193,8 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 				{
 					int y = next_step.first;
 					int x = next_step.second;
+
+					//std::cout << "current: (" << enemy_y << ", " << enemy_x << ")---next: (" << y << ", " << x << ")" << std::endl;
 
 					if (x > enemy_x)
 					{

@@ -45,6 +45,7 @@ public:
 	bool checkToMap(Player& pPlayer, Map& main_map_);
 	void checkDead(Player& pPLayer);
 	bool isDead() const { return is_dead; }
+	bool isFreeze() const { return is_freeze; }
 
 
 private:

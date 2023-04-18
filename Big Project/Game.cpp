@@ -166,12 +166,13 @@ int main(int argc, char* argv[])
 			{
 				ListEnemy[i]->handleMove(pPlayer, gMainMap);
 				ListEnemy[i]->showEnemy(gScreen);
-				pPlayer.checkCollideEnemy(ListEnemy[i]->getRect());
+				if (!ListEnemy[i]->isFreeze())
+				{
+					pPlayer.checkCollideEnemy(ListEnemy[i]->getRect());
+				}
 			}
 			SDL_RemoveTimer(current_time);
 		}
-
-		//if (pPlayer.getLifesRemain() <= 0) { break; }
 
 		SDL_RenderPresent(gScreen);
 
@@ -182,6 +183,12 @@ int main(int argc, char* argv[])
 			int delayTime = oneFrameTime - currentTime;
 			if(delayTime >= 0)
 				SDL_Delay(delayTime);
+		}
+
+		if (pPlayer.getLifesRemain() <= 0) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
+			Close();
+			break;
 		}
 	}
 

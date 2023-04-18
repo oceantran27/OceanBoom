@@ -421,15 +421,15 @@ void Player::checkCollideExplosion(const int& angle_1, const int& angle_2, const
 
 void Player::checkCollideEnemy(const SDL_Rect& rect_)
 {
-	int x1_pos_player = rect.x + ERROR_NUM;
-	int x2_pos_player = rect.x + width_frame - ERROR_NUM;
-	int y1_pos_player = rect.y + ERROR_NUM;
-	int y2_pos_player = rect.y + height_frame - ERROR_NUM;
+	float x1_pos_player = rect.x + ERROR_NUM;
+	float x2_pos_player = rect.x + width_frame - ERROR_NUM;
+	float y1_pos_player = rect.y + ERROR_NUM;
+	float y2_pos_player = rect.y + height_frame - ERROR_NUM;
 
-	int x1_pos_enemy = rect_.x + ERROR_NUM;
-	int x2_pos_enemy = rect_.x + rect_.w - ERROR_NUM;
-	int y1_pos_enemy = rect_.y + ERROR_NUM;
-	int y2_pos_enemy = rect_.y + rect_.h - ERROR_NUM;
+	float x1_pos_enemy = rect_.x + ERROR_NUM;
+	float x2_pos_enemy = rect_.x + rect_.w - ERROR_NUM;
+	float y1_pos_enemy = rect_.y + ERROR_NUM;
+	float y2_pos_enemy = rect_.y + rect_.h - ERROR_NUM;
 
 	if ((x1_pos_player >= x1_pos_enemy && x1_pos_player <= x2_pos_enemy && y1_pos_player >= y1_pos_enemy && y1_pos_player <= y2_pos_enemy) ||
 		(x1_pos_player >= x1_pos_enemy && x1_pos_player <= x2_pos_enemy && y2_pos_player >= y1_pos_enemy && y2_pos_player <= y2_pos_enemy) ||
@@ -652,7 +652,8 @@ void Player::decreaseLife()
 				life--;
 				setSpawn(x_pos / CELL_SIZE, y_pos / CELL_SIZE);
 				status = DEAD;
-				std::cout << life << "\n";
+				//std::cout << life << "\n";
+				SDL_Delay(100);
 			}
 			limit_coll = true;
 		}
