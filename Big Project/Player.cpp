@@ -180,95 +180,102 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 		{
 			int x1 = x + i;
 
-			if (main_map_.tile_map[y][x1] <= 10 && main_map_.tile_map[y][x1] > 0)
+			if (main_map_.tile_map[y][x1] <= NUMBER_OF_LIMIT_CELL && main_map_.tile_map[y][x1] > BLANK_CELL)
 			{
 				break;
 			}
-
-			bomb_->setLeft(i);
 
 			if (item_map_.tile_map[y][x1] != BLANK_ITEM && main_map_.tile_map[y][x1] == BLANK_CELL)
 			{
 				item_map_.tile_map[y][x1] = BLANK_ITEM;
 			}
 
-			if (main_map_.tile_map[y][x1] != BOMB_PLANTED)
+			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				main_map_.tile_map[y][x1] = DEAD_CELL;
+				std::cout << "left: " << main_map_.tile_map[y][x1] << ' ';
+				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
+			main_map_.tile_map[y][x1] = DEAD_CELL;
+			bomb_->setLeft(i);
 		}
 
 		for (int i = 1; i <= bomb_power; i++)
 		{
 			int x1 = x + i;
 
-			if (main_map_.tile_map[y][x1] <= NUMBER_OF_LIMIT_CELL && main_map_.tile_map[y][x1] > 0)
+			if (main_map_.tile_map[y][x1] <= NUMBER_OF_LIMIT_CELL && main_map_.tile_map[y][x1] > BLANK_CELL)
 			{
 				break;
 			}
-
-			bomb_->setRight(i);
 
 			if (item_map_.tile_map[y][x1] != BLANK_ITEM && main_map_.tile_map[y][x1] == BLANK_CELL)
 			{
 				item_map_.tile_map[y][x1] = BLANK_ITEM;
 			}
 
-			if (main_map_.tile_map[y][x1] != BOMB_PLANTED)
+			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				main_map_.tile_map[y][x1] = DEAD_CELL;
+				std::cout << "right: " << main_map_.tile_map[y][x1] << ' ';
+				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
+			main_map_.tile_map[y][x1] = DEAD_CELL;
+			bomb_->setRight(i);
+
 		}
 
 		for (int i = -1; i >= -bomb_power; i--)
 		{
 			int y1 = y + i;
 
-			if (main_map_.tile_map[y1][x] <= 10 && main_map_.tile_map[y1][x] > 0)
+			if (main_map_.tile_map[y1][x] <= NUMBER_OF_LIMIT_CELL && main_map_.tile_map[y1][x] > BLANK_CELL)
 			{
 				break;
 			}
-
-			bomb_->setTop(i);
 
 			if (item_map_.tile_map[y1][x] != BLANK_ITEM && main_map_.tile_map[y1][x] == BLANK_CELL)
 			{
 				item_map_.tile_map[y1][x] = BLANK_ITEM;
 			}
 
-			if (main_map_.tile_map[y1][x] != BOMB_PLANTED)
+
+			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				main_map_.tile_map[y1][x] = DEAD_CELL;
+				std::cout << "top: " << main_map_.tile_map[y1][x] << ' ';
+				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
 
+			main_map_.tile_map[y1][x] = DEAD_CELL;
+			bomb_->setTop(i);
 		}
 
 		for (int i = 1; i <= bomb_power; i++)
 		{
 			int y1 = y + i;
 
-			if (main_map_.tile_map[y1][x] <= 10 && main_map_.tile_map[y1][x] > 0)
+			if (main_map_.tile_map[y1][x] <= NUMBER_OF_LIMIT_CELL && main_map_.tile_map[y1][x] > BLANK_CELL)
 			{
 				break;
 			}
-
-			bomb_->setBot(i);
 
 			if (item_map_.tile_map[y1][x] != BLANK_ITEM && main_map_.tile_map[y1][x] == BLANK_CELL)
 			{
 				item_map_.tile_map[y1][x] = BLANK_ITEM;
 			}
 
-			if (main_map_.tile_map[y1][x] != BOMB_PLANTED)
+			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				main_map_.tile_map[y1][x] = DEAD_CELL;
+				std::cout << "bot: " << main_map_.tile_map[y1][x] << ' ';
+				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
-		}
 
+			main_map_.tile_map[y1][x] = DEAD_CELL;
+			bomb_->setBot(i);
+		}
+		std::cout << std::endl;
 		main_map_.tile_map[y][x] = DEAD_CELL;
 		bomb_->setLim(false);
 	}
@@ -354,8 +361,8 @@ void Player::showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		int bomb_y = pbomb_list[i]->getY();
 		if (current_timer_id >= pbomb_list[i]->getExplosionTimer())
 		{
-			//main_map_.tile_map[bomb_y][bomb_x] = DEAD_CELL;
-			pbomb_list[i]->clearBomb(main_map_);
+			main_map_.tile_map[bomb_y][bomb_x] = BLANK_CELL;
+			pbomb_list[i]->clearBomb(main_map_, item_map_);
 			pbomb_list[i]->Free();
 			pbomb_list[i] = NULL;
 			delete pbomb_list[i];
@@ -363,7 +370,7 @@ void Player::showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		}
 		else if (current_timer_id >= pbomb_list[i]->getBombTimer())
 		{
-			main_map_.tile_map[bomb_y][bomb_x] = DEAD_CELL;
+			main_map_.tile_map[bomb_y][bomb_x] = BLANK_CELL;
 			explodeBomb(des, pbomb_list[i], main_map_, item_map_);
 		}
 		else

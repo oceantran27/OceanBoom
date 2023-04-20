@@ -185,11 +185,11 @@ int main(int argc, char* argv[])
 				SDL_Delay(delayTime);
 		}
 
-		if (pPlayer.getLifesRemain() <= 0) {
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
-			Close();
-			break;
-		}
+		//if (pPlayer.getLifesRemain() <= 0) {
+		//	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
+		//	Close();
+		//	break;
+		//}
 	}
 
 	Close();

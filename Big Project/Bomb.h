@@ -7,7 +7,7 @@
 #include "Player.h"
 #include "Map.h"
 
-#define BOMB_FRAMES 4
+#define BOMB_FRAMES 8
 #define BOMB_EXIST_TIME 2500
 #define EXPLOSION_TIME 800
 
@@ -38,10 +38,12 @@ public:
 
 	void setLim(const bool& lim_) { limit_explode = lim_; }
 	bool getLim() const { return limit_explode; }
-	void clearBomb(Map& main_map_);
+	void clearBomb(Map& main_map_, Map& item_map_);
 
 private:
 	void StartTimer();
+
+	int count;
 
 	//Limit the number of times the bomb explodes
 	bool limit_explode;

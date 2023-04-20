@@ -7,7 +7,7 @@
 #include "Bomb.h"
 #include "Map.h"
 
-#define PLAYER_FRAMES 3
+#define PLAYER_FRAMES 5
 #define LIMIT_LAG 15
 #define PROTECT_TIMER 5000
 
@@ -36,7 +36,7 @@ public:
 	void showPlayer(SDL_Renderer* des);
 	void showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_);
 
-	void increaseBombPower() { bomb_power++; }
+	void increaseBombPower() { bomb_power++; /*std::cout << bomb_power << std::endl;*/ }
 	void increaseBombLimit() { bomb_limit++; }
 	void increasePlayerSpeed() { player_speed += 0.75; }
 	void decreaseLife();

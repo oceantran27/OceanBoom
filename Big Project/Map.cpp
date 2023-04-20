@@ -70,19 +70,32 @@ void GameMap::drawMap(SDL_Renderer* screen)
 			int main_val = main_map_.tile_map[main_map_y][main_map_x];
 			int item_val = item_map_.tile_map[main_map_y][main_map_x];
 
-			if (item_val != BLANK_ITEM)
+			if (main_val == BLANK_CELL)
 			{
-				tiles[item_val].setRect(j, i);
-				tiles[item_val].Render(screen);
-			}
+				tiles[main_val].setRect(j, i);
+				tiles[main_val].Render(screen);
 
-			if (main_val < BLANK_CELL)
+				if (item_val != BLANK_ITEM)
+				{
+					tiles[item_val].setRect(j, i);
+					tiles[item_val].Render(screen);
+				}
+			}
+			else
 			{
-				main_val = BLANK_CELL;
-			}
-			tiles[main_val].setRect(j, i);
-			tiles[main_val].Render(screen);
+				if (item_val != BLANK_ITEM)
+				{
+					tiles[item_val].setRect(j, i);
+					tiles[item_val].Render(screen);
+				}
 
+				if (main_val < BLANK_CELL)
+				{
+					main_val = BLANK_CELL;
+				}
+				tiles[main_val].setRect(j, i);
+				tiles[main_val].Render(screen);
+			}
 			main_map_x++;
 		}
 		main_map_y++;

@@ -9,6 +9,7 @@ Bomb::Bomb()
 	max_left = 0;
 	max_top = 0;
 	max_bot = 0;
+	count = 0;
 }
 
 Bomb::~Bomb()
@@ -59,16 +60,20 @@ void Bomb::displayBomb(SDL_Renderer* des)
 	SDL_Rect* current_clip = &frame_clip[frame];
 	SDL_Rect renderQuad = { x*CELL_SIZE, y*CELL_SIZE, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
-	frame++;
+	if (count % 2 == 0)
+	{
+		frame++;
+	}
+	count++;
 
-	current_clip = NULL;
-	delete(current_clip);
+	//current_clip = NULL;
+	//delete(current_clip);
 }
 
 void Bomb::displayExplosion(SDL_Renderer* des)
 {
 	setRect(x * CELL_SIZE, y * CELL_SIZE);
-	loadImg("Images/explode.png", screen);
+	loadImg("Bomb/explode_.png", des);
 	Render(des);
 
 	for (int i = max_left; i <= max_right; i++)
@@ -77,8 +82,8 @@ void Bomb::displayExplosion(SDL_Renderer* des)
 		{
 			continue;
 		}
-		setRect((x + i)*CELL_SIZE, y * CELL_SIZE);
-		loadImg("Images/explode_x.png", screen);
+		setRect((x + i) * CELL_SIZE, y * CELL_SIZE);
+		loadImg("Bomb/explode_x_.png", des);
 		Render(des);
 	}
 
@@ -89,16 +94,23 @@ void Bomb::displayExplosion(SDL_Renderer* des)
 			continue;
 		}
 		setRect(x * CELL_SIZE, (y + i) * CELL_SIZE);
-		loadImg("Images/explode_y.png", screen);
+		loadImg("Bomb/explode_y_.png", des);
 		Render(des);
 	}
+
+	std::cout << "max_left = " << max_left << std::endl;
+	std::cout << "max_right = " << max_right << std::endl;
+	std::cout << "max_top = " << max_top << std::endl;
+	std::cout << "max_bot = " << max_bot << std::endl;
+	std::cout << "--------------------------------------------\n";
 }
 
-void Bomb::clearBomb(Map& main_map_)
+void Bomb::clearBomb(Map& main_map_, Map& item_map_)
 {
 	for (int i = max_left; i <= max_right; i++)
 	{
 		main_map_.tile_map[y][x + i] = BLANK_CELL;
+		
 	}
 	for (int i = max_top; i <= max_bot; i++)
 	{
@@ -109,7 +121,7 @@ void Bomb::clearBomb(Map& main_map_)
 void Bomb::plantBomb(const int& x_, const int& y_) {
 	if (timer_exist_bomb == 0) {
 		StartTimer();
-		loadClipImg("Images/bomb.png");
+		loadClipImg("Bomb/bomb.png");
 		setClip();
 		x = x_;
 		y = y_;
