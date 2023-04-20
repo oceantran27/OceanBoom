@@ -66,8 +66,8 @@ void Bomb::displayBomb(SDL_Renderer* des)
 	}
 	count++;
 
-	//current_clip = NULL;
-	//delete(current_clip);
+	current_clip = NULL;
+	delete(current_clip);
 }
 
 void Bomb::displayExplosion(SDL_Renderer* des)
@@ -98,11 +98,11 @@ void Bomb::displayExplosion(SDL_Renderer* des)
 		Render(des);
 	}
 
-	std::cout << "max_left = " << max_left << std::endl;
-	std::cout << "max_right = " << max_right << std::endl;
-	std::cout << "max_top = " << max_top << std::endl;
-	std::cout << "max_bot = " << max_bot << std::endl;
-	std::cout << "--------------------------------------------\n";
+	//std::cout << "max_left = " << max_left << std::endl;
+	//std::cout << "max_right = " << max_right << std::endl;
+	//std::cout << "max_top = " << max_top << std::endl;
+	//std::cout << "max_bot = " << max_bot << std::endl;
+	//std::cout << "--------------------------------------------\n";
 }
 
 void Bomb::clearBomb(Map& main_map_, Map& item_map_)

@@ -120,15 +120,8 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 			if (pbomb_list.size() < bomb_limit)
 			{
 				int x, y;
-				if (status == WALK_LEFT)
-				{
-					x = ((x_pos + width_frame - ERROR_NUM) / CELL_SIZE);
-				}
-				else
-				{
-					x = ((x_pos + ERROR_NUM) / CELL_SIZE);
-				}
-				y = ((y_pos + 0.7 * height_frame - ERROR_NUM) / CELL_SIZE);
+				x = ((x_pos + 0.5 * width_frame - ERROR_NUM) / CELL_SIZE);
+				y = ((y_pos + 0.75 * height_frame - ERROR_NUM) / CELL_SIZE);
 
 				if (main_map_.tile_map[y][x] == BLANK_CELL)
 				{
@@ -176,7 +169,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 	if (bomb_->getLim())
 	{
-		for (int i = -1; i >= -bomb_power; i--)
+		for (int i = 0; i >= -bomb_power; i--)
 		{
 			int x1 = x + i;
 
@@ -192,7 +185,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				std::cout << "left: " << main_map_.tile_map[y][x1] << ' ';
+				//std::cout << "left: " << main_map_.tile_map[y][x1] << ' ';
 				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
@@ -200,7 +193,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 			bomb_->setLeft(i);
 		}
 
-		for (int i = 1; i <= bomb_power; i++)
+		for (int i = 0; i <= bomb_power; i++)
 		{
 			int x1 = x + i;
 
@@ -216,7 +209,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				std::cout << "right: " << main_map_.tile_map[y][x1] << ' ';
+				//std::cout << "right: " << main_map_.tile_map[y][x1] << ' ';
 				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
@@ -225,7 +218,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 		}
 
-		for (int i = -1; i >= -bomb_power; i--)
+		for (int i = 0; i >= -bomb_power; i--)
 		{
 			int y1 = y + i;
 
@@ -242,7 +235,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				std::cout << "top: " << main_map_.tile_map[y1][x] << ' ';
+				//std::cout << "top: " << main_map_.tile_map[y1][x] << ' ';
 				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
@@ -251,7 +244,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 			bomb_->setTop(i);
 		}
 
-		for (int i = 1; i <= bomb_power; i++)
+		for (int i = 0; i <= bomb_power; i++)
 		{
 			int y1 = y + i;
 
@@ -267,7 +260,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				std::cout << "bot: " << main_map_.tile_map[y1][x] << ' ';
+				//std::cout << "bot: " << main_map_.tile_map[y1][x] << ' ';
 				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
@@ -275,8 +268,7 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 			main_map_.tile_map[y1][x] = DEAD_CELL;
 			bomb_->setBot(i);
 		}
-		std::cout << std::endl;
-		main_map_.tile_map[y][x] = DEAD_CELL;
+		//std::cout << std::endl;
 		bomb_->setLim(false);
 	}
 	bomb_->displayExplosion(des);
@@ -370,7 +362,7 @@ void Player::showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		}
 		else if (current_timer_id >= pbomb_list[i]->getBombTimer())
 		{
-			main_map_.tile_map[bomb_y][bomb_x] = BLANK_CELL;
+			main_map_.tile_map[bomb_y][bomb_x] = DEAD_CELL;
 			explodeBomb(des, pbomb_list[i], main_map_, item_map_);
 		}
 		else
@@ -428,14 +420,14 @@ void Player::checkCollideExplosion(const int& angle_1, const int& angle_2, const
 
 void Player::checkCollideEnemy(const SDL_Rect& rect_)
 {
-	float x1_pos_player = rect.x + ERROR_NUM;
-	float x2_pos_player = rect.x + width_frame - ERROR_NUM;
-	float y1_pos_player = rect.y + ERROR_NUM;
-	float y2_pos_player = rect.y + height_frame - ERROR_NUM;
+	float x1_pos_player = x_pos + ERROR_NUM;
+	float x2_pos_player = x_pos + width_frame - ERROR_NUM;
+	float y1_pos_player = real_y_pos + ERROR_NUM;
+	float y2_pos_player = y_pos + height_frame - ERROR_NUM;
 
 	float x1_pos_enemy = rect_.x + ERROR_NUM;
 	float x2_pos_enemy = rect_.x + rect_.w - ERROR_NUM;
-	float y1_pos_enemy = rect_.y + ERROR_NUM;
+	float y1_pos_enemy = rect_.y + 0.4*rect_.h + ERROR_NUM;
 	float y2_pos_enemy = rect_.y + rect_.h - ERROR_NUM;
 
 	if ((x1_pos_player >= x1_pos_enemy && x1_pos_player <= x2_pos_enemy && y1_pos_player >= y1_pos_enemy && y1_pos_player <= y2_pos_enemy) ||
@@ -459,17 +451,18 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 
 	x_pos += x_val;
 	y_pos += y_val;
+	real_y_pos = y_pos + 0.4 * height_frame;
 
 	int x1, x2;
 	int y1, y2;
 
 	//Check for collision of player and obstacles
 
-	x1 = (x_pos + ERROR_NUM) / CELL_SIZE;
-	x2 = (x_pos + width_frame - ERROR_NUM) / CELL_SIZE;
+	x1 = (x_pos + 5*ERROR_NUM) / CELL_SIZE;
+	x2 = (x_pos + width_frame - 5*ERROR_NUM) / CELL_SIZE;
 
-	y1 = (y_pos + ERROR_NUM) / CELL_SIZE;
-	y2 = (y_pos + height_frame - ERROR_NUM) / CELL_SIZE;
+	y1 = (real_y_pos + ERROR_NUM) / CELL_SIZE;
+	y2 = (y_pos + height_frame - 5*ERROR_NUM) / CELL_SIZE;
 
 	int main_top_right = main_map_.tile_map[y1][x2];
 	int main_bot_right = main_map_.tile_map[y2][x2];
@@ -489,18 +482,13 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 		if (check_main_top_right || check_main_bot_right)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * CELL_SIZE;
-			int head_lag_part = (y1 + 1) * CELL_SIZE - y_pos;
 			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
 				&& check_main_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_CELL)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
 				int y3 = y_pos / CELL_SIZE;
 			}
-			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
-				&& check_main_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_CELL)
-			{
-				y_pos += head_lag_part + ERROR_NUM;
-			}
+
 			else
 			{
 				x_pos = old_x_pos;
@@ -515,16 +503,10 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 		if (check_main_top_left || check_main_bot_left)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * CELL_SIZE;
-			int head_lag_part = (y1 + 1) * CELL_SIZE - y_pos;
 			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
 				&& check_main_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_CELL)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
-			}
-			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
-				&& check_main_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_CELL)
-			{
-				y_pos += head_lag_part + ERROR_NUM;
 			}
 			else
 			{
@@ -584,45 +566,28 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 
 
 	//Check for collision of player and items
-	x1 = (x_pos + 3*ERROR_NUM) / CELL_SIZE;
-	x2 = (x_pos + width_frame - 3*ERROR_NUM) / CELL_SIZE;
 
-	y1 = (y_pos + 3*ERROR_NUM) / CELL_SIZE;
-	y2 = (y_pos + height_frame - 3*ERROR_NUM) / CELL_SIZE;
+	int x_center = (x_pos + 0.5 * width_frame) / CELL_SIZE;
+	int y_center = (y_pos + 0.5 * height_frame) / CELL_SIZE;
+	int item_center = item_map_.tile_map[y_center][x_center];
 
-	int item_top_right = item_map_.tile_map[y1][x2];
-	int item_bot_right = item_map_.tile_map[y2][x2];
-	int item_top_left = item_map_.tile_map[y1][x1];
-	int item_bot_left = item_map_.tile_map[y2][x1];
 
-	if (item_top_left == BOMB_UP || item_bot_left == BOMB_UP || item_top_right == BOMB_UP || item_bot_right == BOMB_UP)
+	if (item_center == BOMB_UP)
 	{
 		increaseBombLimit();
 	}
-	if (item_top_left == POWER_UP || item_bot_left == POWER_UP || item_top_right == POWER_UP || item_bot_right == POWER_UP)
+	if (item_center == POWER_UP)
 	{
 		increaseBombPower();
 	}
-	if (item_top_left == SPEED_UP || item_bot_left == SPEED_UP || item_top_right == SPEED_UP || item_bot_right == SPEED_UP)
+	if (item_center == SPEED_UP)
 	{
 		increasePlayerSpeed();
 	}
 
-	if (item_top_left != BLANK_ITEM)
+	if (item_center != BLANK_ITEM)
 	{
-		item_map_.tile_map[y1][x1] = BLANK_ITEM;
-	}
-	if (item_bot_left != BLANK_ITEM)
-	{
-		item_map_.tile_map[y2][x1] = BLANK_ITEM;
-	}
-	if (item_top_right != BLANK_ITEM)
-	{
-		item_map_.tile_map[y1][x2] = BLANK_ITEM;
-	}
-	if (item_bot_right != BLANK_ITEM)
-	{
-		item_map_.tile_map[y2][x2] = BLANK_ITEM;
+		item_map_.tile_map[y_center][x_center] = BLANK_ITEM;
 	}
 
 	//Check for collision of player and bombs 
@@ -636,7 +601,7 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 			int bomb_y_pos = bomb_y * CELL_SIZE;
 
 			if ((y_pos + height_frame < bomb_y_pos) ||
-				(y_pos > bomb_y_pos + CELL_SIZE) ||
+				(real_y_pos > bomb_y_pos + CELL_SIZE) ||
 				(x_pos + width_frame < bomb_x_pos) ||
 				(x_pos > bomb_x_pos + CELL_SIZE))
 			{
@@ -659,7 +624,7 @@ void Player::decreaseLife()
 				life--;
 				setSpawn(x_pos / CELL_SIZE, y_pos / CELL_SIZE);
 				status = DEAD;
-				//std::cout << life << "\n";
+				std::cout << life << "\n";
 				SDL_Delay(100);
 			}
 			limit_coll = true;

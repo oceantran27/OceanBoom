@@ -186,15 +186,13 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 					enemy_x = (rect.x + 0.7 * width_frame) / CELL_SIZE;
 				}
 
-				int player_x = pPlayer.getXPos() / CELL_SIZE;
-				int player_y = pPlayer.getYPos() / CELL_SIZE;
+				int player_x = (pPlayer.getXPos() + 0.5*pPlayer.getWidthFrame()) / CELL_SIZE;
+				int player_y = (pPlayer.getYPos() + 0.5*pPlayer.getHeightFrame()) / CELL_SIZE;
 				Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(player_y, player_x));
 				if (next_step.first != -1 && next_step.second != -1)
 				{
 					int y = next_step.first;
 					int x = next_step.second;
-
-					//std::cout << "current: (" << enemy_y << ", " << enemy_x << ")---next: (" << y << ", " << x << ")" << std::endl;
 
 					if (x > enemy_x)
 					{
@@ -340,13 +338,15 @@ bool Enemy::isCollideCell(Map& main_map_)
 	int x1, x2;
 	int y1, y2;
 
+	real_y_pos = y_pos + 0.4 * height_frame;
+
 	//Check for collision of enemies and obstacles
 
 	x1 = (x_pos + ERROR_NUM) / CELL_SIZE;
 	x2 = (x_pos + width_frame - ERROR_NUM) / CELL_SIZE;
 
-	y1 = (y_pos + ERROR_NUM) / CELL_SIZE;
-	y2 = (y_pos + height_frame - ERROR_NUM) / CELL_SIZE;
+	y1 = (real_y_pos + ERROR_NUM) / CELL_SIZE;
+	y2 = (y_pos + height_frame - 5*ERROR_NUM) / CELL_SIZE;
 
 	int main_top_right = main_map_.tile_map[y1][x2];
 	int main_bot_right = main_map_.tile_map[y2][x2];

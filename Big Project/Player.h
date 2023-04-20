@@ -66,6 +66,7 @@ private:
 
 	float x_pos;
 	float y_pos;
+	float real_y_pos;
 
 	int frame_effect;
 	int frame;

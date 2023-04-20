@@ -59,6 +59,7 @@ private:
 
 	float x_pos;
 	float y_pos;
+	float real_y_pos;
 
 	int width_frame;
 	int height_frame;

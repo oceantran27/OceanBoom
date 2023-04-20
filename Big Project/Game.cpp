@@ -150,7 +150,6 @@ int main(int argc, char* argv[])
 
 		pPlayer.showBomb(gScreen, gMainMap, gItemMap);
 		pPlayer.handleMove(gMainMap, gItemMap);
-		pPlayer.showPlayer(gScreen);
 
 		for (int i = 0; i < ListEnemy.size(); i++)
 		{
@@ -173,6 +172,9 @@ int main(int argc, char* argv[])
 			}
 			SDL_RemoveTimer(current_time);
 		}
+
+		pPlayer.showPlayer(gScreen);
+
 
 		SDL_RenderPresent(gScreen);
 
