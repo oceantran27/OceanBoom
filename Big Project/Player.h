@@ -35,10 +35,13 @@ public:
 
 	void showPlayer(SDL_Renderer* des);
 	void showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_);
+	void showLife(SDL_Renderer* des);
+
 
 	void increaseBombPower() { bomb_power++; /*std::cout << bomb_power << std::endl;*/ }
 	void increaseBombLimit() { bomb_limit++; }
 	void increasePlayerSpeed() { player_speed += 0.75; }
+	void increasePoint(const int& point_plus) { point += point_plus; std::cout << point << std::endl; }
 	void decreaseLife();
 
 	bool loadClipImg(std::string path, SDL_Renderer* screen);
@@ -46,6 +49,7 @@ public:
 	void setSpawn(const float& x_, const float& y_);
 
 	int getLifesRemain() const { return life; }
+	int getPoint() const { return point; }
 	float getXPos() const { return x_pos; }
 	float getYPos() const { return y_pos; }
 	float getWidthFrame() const { return width_frame; }
@@ -56,6 +60,7 @@ public:
 	void checkToMap(Map& main_map_, Map& item_map_);
 
 private:
+	int point;
 	int life;
 	int bomb_limit;
 	int bomb_power;

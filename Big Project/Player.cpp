@@ -624,8 +624,7 @@ void Player::decreaseLife()
 				life--;
 				setSpawn(x_pos / CELL_SIZE, y_pos / CELL_SIZE);
 				status = DEAD;
-				std::cout << life << "\n";
-				SDL_Delay(100);
+				SDL_Delay(150);
 			}
 			limit_coll = true;
 		}
@@ -633,5 +632,15 @@ void Player::decreaseLife()
 	else
 	{
 		limit_coll = false;
+	}
+}
+
+void Player::showLife(SDL_Renderer* des)
+{
+	for (int i = 1; i <= life; i++)
+	{
+		setRect(i * CELL_SIZE, 0.2 * CELL_SIZE);
+		loadImg("Player/life.png", des);
+		Render(des);
 	}
 }

@@ -5,13 +5,14 @@
 #include "Player.h"
 #include "Timer.h"
 #include "Enemy.h"
+#include "Text.h"
 
 bool InitWindow()
 {
-	if (SDL_INIT_VIDEO < 0) { return false; }
+	if (SDL_INIT_VIDEO < 0 || TTF_Init() < 0) { return false; }
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-	gWindow = SDL_CreateWindow("Bomberman", 
+	gWindow = SDL_CreateWindow("Boom Ocean", 
 								SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 								SCREEN_WIDTH, SCREEN_HEIGHT, 
 								SDL_WINDOW_SHOWN);
@@ -21,6 +22,9 @@ bool InitWindow()
 	gScreen = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gScreen == NULL)
 		return false;
+
+	SDL_Surface* iconSurface = IMG_Load("Images/icon.png");
+	SDL_SetWindowIcon(gWindow, iconSurface);
 
 	SDL_SetRenderDrawColor(gScreen, 255, 255, 255, 255);
 
@@ -66,8 +70,6 @@ Player InitPlayer(const int& type)
 	fclose(fp);
 
 	player_.setSpawn(x, y);
-	//player_.loadClipImg("Player/down.png", gScreen);
-	//player_.setClip();
 
 	return player_;
 }
@@ -144,11 +146,24 @@ int main(int argc, char* argv[])
 		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
 		SDL_RenderClear(gScreen);
 
+		TTF_Font* gFont = NULL;
+		gFont = TTF_OpenFont("Font/ariblk.ttf", 20);
+		if (gFont == NULL) { std::cout << "ngu"; }
+		Text time_game;
+		time_game.setColor(Text::YELLOW_TEXT);
+		Text point_game;
+		point_game.setColor(Text::YELLOW_TEXT);
+
+		Uint32 time_val = SDL_GetTicks() / 1000;
+		Uint32 remain_time = 180 - time_val;
+		Uint32 point_val = pPlayer.getPoint();
+
 		gGameMap.drawMap(gScreen);
 		gGameMap.updateItemMap(gItemMap);
 		gGameMap.updateMainMap(gMainMap);
 
 		pPlayer.showBomb(gScreen, gMainMap, gItemMap);
+		pPlayer.showLife(gScreen);
 		pPlayer.handleMove(gMainMap, gItemMap);
 
 		for (int i = 0; i < ListEnemy.size(); i++)
@@ -156,6 +171,8 @@ int main(int argc, char* argv[])
 			SDL_TimerID current_time = SDL_GetTicks();
 			if (ListEnemy[i]->isDead() && current_time >= ListEnemy[i]->getTimeDead())
 			{
+				int plus_point = ListEnemy[i]->getTypeEnemy() * 100;
+				pPlayer.increasePoint(plus_point);
 				ListEnemy[i]->Free();
 				ListEnemy[i] = NULL;
 				delete(ListEnemy[i]);
@@ -163,6 +180,10 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
+				if (remain_time == 30)
+				{
+					ListEnemy[i]->increaseEnemySpeed();
+				}
 				ListEnemy[i]->handleMove(pPlayer, gMainMap);
 				ListEnemy[i]->showEnemy(gScreen);
 				if (!ListEnemy[i]->isFreeze())
@@ -175,6 +196,31 @@ int main(int argc, char* argv[])
 
 		pPlayer.showPlayer(gScreen);
 
+		std::string str_point = "MARK: ";
+		std::string str_val = std::to_string(point_val);
+		str_point += str_val;
+
+		point_game.setText(str_point);
+		point_game.loadFromRenderText(gFont, gScreen);
+		point_game.renderText(gScreen, 9 * CELL_SIZE, 0.25 * CELL_SIZE);
+
+		std::string str_time = "TIME: ";
+
+		if (remain_time <= 0)
+		{
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
+			Close();
+			break;
+		}
+		else
+		{
+			std::string str_val = std::to_string(remain_time);
+			str_time += str_val;
+
+			time_game.setText(str_time);
+			time_game.loadFromRenderText(gFont, gScreen);
+			time_game.renderText(gScreen, 17 * CELL_SIZE, 0.25 * CELL_SIZE);
+		}
 
 		SDL_RenderPresent(gScreen);
 
@@ -187,11 +233,11 @@ int main(int argc, char* argv[])
 				SDL_Delay(delayTime);
 		}
 
-		//if (pPlayer.getLifesRemain() <= 0) {
-		//	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
-		//	Close();
-		//	break;
-		//}
+		if (pPlayer.getLifesRemain() <= 0) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
+			Close();
+			break;
+		}
 	}
 
 	Close();

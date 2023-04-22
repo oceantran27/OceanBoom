@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -28,7 +29,7 @@ static SDL_Event gEvent;
 #define SPEED_UP 16
 #define CELL_SIZE 52
 #define MAX_MAP_X 20
-#define MAX_MAP_Y 13
+#define MAX_MAP_Y 12
 
 const int FRAME_PER_SECOND = 22;
 const int SCREEN_WIDTH = CELL_SIZE*MAX_MAP_X;

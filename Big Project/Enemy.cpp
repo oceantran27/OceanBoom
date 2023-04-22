@@ -108,6 +108,8 @@ Enemy::Enemy()
 	x_val = 0;
 	y_val = 0;
 
+	is_speed_up = false;
+
 	is_coll = 0;
 
 	x_pos = 0;
@@ -499,3 +501,15 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 
 	return false;
 }
+
+void Enemy::increaseEnemySpeed()
+{
+	if (!is_speed_up)
+	{
+		enemy_speed[type] += 1.5;
+		is_speed_up = true;
+	}
+}
+
+
+

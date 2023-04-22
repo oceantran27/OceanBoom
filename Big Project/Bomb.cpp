@@ -73,36 +73,63 @@ void Bomb::displayBomb(SDL_Renderer* des)
 void Bomb::displayExplosion(SDL_Renderer* des)
 {
 	setRect(x * CELL_SIZE, y * CELL_SIZE);
-	loadImg("Bomb/explode_.png", des);
+	loadImg("Bomb/mid.png", des);
 	Render(des);
 
-	for (int i = max_left; i <= max_right; i++)
+	setRect((x + max_left) * CELL_SIZE, y * CELL_SIZE);
+	loadImg("Bomb/left_2.png", des);
+	Render(des);
+
+	setRect((x + max_right) * CELL_SIZE, y * CELL_SIZE);
+	loadImg("Bomb/right_2.png", des);
+	Render(des);
+
+	setRect(x * CELL_SIZE, (y + max_top) * CELL_SIZE);
+	loadImg("Bomb/top_2.png", des);
+	Render(des);
+
+	setRect(x * CELL_SIZE, (y + max_bot) * CELL_SIZE);
+	loadImg("Bomb/bot_2.png", des);
+	Render(des);
+
+	if (max_left < -1)
 	{
-		if (i == 0)
+		for (int i = -1; i > max_left; i--)
 		{
-			continue;
+			setRect((x + i) * CELL_SIZE, y * CELL_SIZE);
+			loadImg("Bomb/left_1.png", des);
+			Render(des);
 		}
-		setRect((x + i) * CELL_SIZE, y * CELL_SIZE);
-		loadImg("Bomb/explode_x_.png", des);
-		Render(des);
 	}
 
-	for (int i = max_top; i <= max_bot; i++)
+	if (max_right > 1)
 	{
-		if (i == 0)
+		for (int i = 1; i < max_right; i++)
 		{
-			continue;
+			setRect((x + i) * CELL_SIZE, y * CELL_SIZE);
+			loadImg("Bomb/right_1.png", des);
+			Render(des);
 		}
-		setRect(x * CELL_SIZE, (y + i) * CELL_SIZE);
-		loadImg("Bomb/explode_y_.png", des);
-		Render(des);
 	}
 
-	//std::cout << "max_left = " << max_left << std::endl;
-	//std::cout << "max_right = " << max_right << std::endl;
-	//std::cout << "max_top = " << max_top << std::endl;
-	//std::cout << "max_bot = " << max_bot << std::endl;
-	//std::cout << "--------------------------------------------\n";
+	if (max_top < -1)
+	{
+		for (int i = -1; i > max_top; i--)
+		{
+			setRect(x * CELL_SIZE, (y + i) * CELL_SIZE);
+			loadImg("Bomb/top_1.png", des);
+			Render(des);
+		}
+	}
+	if (max_bot > 1)
+	{
+		for (int i = 1; i < max_bot; i++)
+		{
+			setRect(x * CELL_SIZE, (y + i) * CELL_SIZE);
+			loadImg("Bomb/bot_1.png", des);
+			Render(des);
+		}
+	}
 }
 
 void Bomb::clearBomb(Map& main_map_, Map& item_map_)

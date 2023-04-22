@@ -35,10 +35,12 @@ public:
 
 	float getXPos() const { return x_pos; }
 	float getYPos() const { return y_pos; }
+	int getTypeEnemy() const { return type;}
 	SDL_TimerID getTimeDead() const { return dead_time; }
 
 	void showEnemy(SDL_Renderer* des);
 	void handleMove(Player& pPLayer, Map& main_map_);
+	void increaseEnemySpeed();
 
 	bool isCollideCell(Map& main_map_);
 	bool isCollideExplosion(Map& main_map_);
@@ -52,6 +54,7 @@ private:
 	//Type of enemy
 	int type;
 
+	bool is_speed_up;
 	float enemy_speed[4] = {0, 3, 3.5};
 
 	float x_val;
