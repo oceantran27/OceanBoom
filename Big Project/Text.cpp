@@ -44,6 +44,11 @@ void Text::setColor(int type)
 		SDL_Color color = { 220, 150, 0 };
 		text_color = color;
 	}
+	else if (type == RED_TEXT)
+	{
+		SDL_Color color = { 237, 28, 36 };
+		text_color = color;
+	}
 }
 
 void Text::renderText(SDL_Renderer* screen,

@@ -6,36 +6,48 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <cmath>
 #include <ctime>
 #include <random>
+#include "BaseObject.h"
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 
+
+//Others
 #define ERROR_NUM 1
 #define NUMBER_OF_LIMIT_CELL 10
+
+//Cells
 #define BLANK_CELL 0
 #define BOMB_PLANTED -1
 #define BLOCK_CELL -2
 #define DEAD_CELL -3
+
+//Items
 #define BLANK_ITEM -1
 #define POWER_UP 14
 #define BOMB_UP 15
 #define SPEED_UP 16
+
+//Maps
 #define CELL_SIZE 52
 #define MAX_MAP_X 20
 #define MAX_MAP_Y 12
 
+//Screen
 const int FRAME_PER_SECOND = 22;
 const int SCREEN_WIDTH = CELL_SIZE*MAX_MAP_X;
 const int SCREEN_HEIGHT = CELL_SIZE*MAX_MAP_Y;
 const int SCREEN_BPP = 64;
 
+//Color
 const int COLOR_KEY_R = 90;
 const int COLOR_KEY_G = 182;
 const int COLOR_KEY_B = 0;
@@ -59,6 +71,12 @@ struct Map
 
 	int tile_map[MAX_MAP_Y][MAX_MAP_X];
 };
+
+namespace SDLCommonFunc
+{
+	int ShowMenu(SDL_Renderer* des);
+	bool isFocusWithRect(const int& x, const int& y, const SDL_Rect& rect);
+}
 
 #endif // !COMMON_FUNCTION_H
 

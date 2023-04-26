@@ -506,7 +506,7 @@ void Enemy::increaseEnemySpeed()
 {
 	if (!is_speed_up)
 	{
-		enemy_speed[type] += 1.5;
+		enemy_speed[type] += 4;
 		is_speed_up = true;
 	}
 }

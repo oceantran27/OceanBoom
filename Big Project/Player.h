@@ -38,10 +38,10 @@ public:
 	void showLife(SDL_Renderer* des);
 
 
-	void increaseBombPower() { bomb_power++; /*std::cout << bomb_power << std::endl;*/ }
+	void increaseBombPower() { bomb_power++; }
 	void increaseBombLimit() { bomb_limit++; }
 	void increasePlayerSpeed() { player_speed += 0.75; }
-	void increasePoint(const int& point_plus) { point += point_plus; std::cout << point << std::endl; }
+	void increasePoint(const int& point_plus) { point += point_plus; }
 	void decreaseLife();
 
 	bool loadClipImg(std::string path, SDL_Renderer* screen);

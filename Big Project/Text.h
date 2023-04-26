@@ -14,7 +14,7 @@ public:
 	enum TextColor
 	{
 		YELLOW_TEXT = 0,
-		WHITE_TEXT = 1,
+		RED_TEXT = 1,
 		BLACK_TEXT = 2
 	};
 

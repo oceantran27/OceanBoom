@@ -185,7 +185,6 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				//std::cout << "left: " << main_map_.tile_map[y][x1] << ' ';
 				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
@@ -209,7 +208,6 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y][x1] != BLANK_CELL && main_map_.tile_map[y][x1] != BLOCK_CELL && main_map_.tile_map[y][x1] != DEAD_CELL)
 			{
-				//std::cout << "right: " << main_map_.tile_map[y][x1] << ' ';
 				main_map_.tile_map[y][x1] = BLANK_CELL;
 				break;
 			}
@@ -235,7 +233,6 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				//std::cout << "top: " << main_map_.tile_map[y1][x] << ' ';
 				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
