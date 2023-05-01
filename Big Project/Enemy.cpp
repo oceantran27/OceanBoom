@@ -2,7 +2,7 @@
 #include <queue>
 #include <cstring>
 
-#define LIMIT_LAG 20
+#define LIMIT_LAG 21
 
 typedef std::pair<int, int> Pair;
 
@@ -18,12 +18,12 @@ struct Cell
 	{
 		row = -1;
 		col = -1;
-		parent = nullptr;
+		parent = NULL;
 	}
 	~Cell()
 	{
-		parent = NULL;
 		delete(parent);
+		parent = NULL;
 	}
 	Cell(int row_, int col_)
 	{
@@ -108,10 +108,6 @@ Enemy::Enemy()
 	x_val = 0;
 	y_val = 0;
 
-	is_speed_up = false;
-
-	is_coll = 0;
-
 	x_pos = 0;
 	y_pos = 0;
 
@@ -123,14 +119,14 @@ Enemy::Enemy()
 
 	is_freeze = false;
 	is_dead = false;
+	is_speed_up = false;
+	is_coll = false;
 
 	status = WALK_DOWN;
 }
 
 Enemy::~Enemy()
 {
-	SDL_RemoveTimer(freeze_time);
-	SDL_RemoveTimer(dead_time);
 }
 
 void Enemy::handleMove(Player& pPlayer, Map& main_map_)
@@ -138,7 +134,7 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 	x_val = 0;
 	y_val = 0;
 
-	if (status == FREEZE || status == DEAD)
+	if (status == FREEZE || status == DEAD || status == WALK_NONE)
 	{
 		x_val = 0;
 		y_val = 0;
@@ -166,33 +162,24 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 		{
 			if (type == 1)
 			{
+				//Random move
 				srand(SDL_GetTicks());
 				if (!checkToMap(pPlayer, main_map_))
 				{
 					status = rand() % 4 + 1;
 				}
 			}
-			else if (type > 1)
+			else
 			{
-				int enemy_x, enemy_y;
-
-				enemy_x = (rect.x + 0.3 * rect.w) / CELL_SIZE;
-				enemy_y = (rect.y + 0.3 * rect.w) / CELL_SIZE;
-
-				if (status == WALK_UP)
-				{
-					enemy_y = (rect.y + 0.7 * height_frame) / CELL_SIZE;
-				}
-				else if (status == WALK_LEFT)
-				{
-					enemy_x = (rect.x + 0.7 * width_frame) / CELL_SIZE;
-				}
+				int enemy_x = (x_pos + 0.5 * width_frame) / CELL_SIZE;
+				int enemy_y = (y_pos + 0.5 * height_frame) / CELL_SIZE;
 
 				int player_x = (pPlayer.getXPos() + 0.5*pPlayer.getWidthFrame()) / CELL_SIZE;
 				int player_y = (pPlayer.getYPos() + 0.5*pPlayer.getHeightFrame()) / CELL_SIZE;
 				Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(player_y, player_x));
 				if (next_step.first != -1 && next_step.second != -1)
 				{
+					//Found and follow
 					int y = next_step.first;
 					int x = next_step.second;
 
@@ -212,24 +199,33 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 					{
 						status = WALK_UP;
 					}
+					checkToMap(pPlayer, main_map_);
 				}
-				checkToMap(pPlayer, main_map_);
+				else 
+				{
+					//Random move
+					srand(SDL_GetTicks());
+					if (!checkToMap(pPlayer, main_map_))
+					{
+						status = rand() % 4 + 1;
+					}
+				}
 			}
 		}
 		else
 		{
 			status = FREEZE;
-			SDL_TimerID current_freeze_time = SDL_GetTicks();
+			Uint32 current_freeze_time = SDL_GetTicks();
 			if (current_freeze_time >= freeze_time)
 			{
 				is_freeze = false;
 				status = WALK_DOWN;
+				enemy_life[type]++;
 			}
 			else
 			{
 				checkDead(pPlayer);
 			}
-			SDL_RemoveTimer(current_freeze_time);
 		}
 	}
 }
@@ -291,6 +287,50 @@ void Enemy::showEnemy(SDL_Renderer* des)
 			loadImg("Enemy/2_Dead.png", des);
 		}
 		break;
+
+	case 3:
+
+		int i = 0;
+		while (i < 10)
+		{
+			if (i < enemy_life[type])
+			{
+				loadImg("Enemy/life_boss.png", des);
+			}
+			else
+			{
+				loadImg("Enemy/clone_life_boss.png", des);
+			}
+			SDL_Rect renderQuad_ = { (i * 10) + rect.x, rect.y - 2 * rect.h, rect.w, rect.h };
+			SDL_RenderCopy(des, pObject, NULL, &renderQuad_);
+			i++;
+		}
+
+		if (status == FREEZE)
+		{
+			loadImg("Enemy/3_Freeze.png", des);
+		}
+		else if (status == WALK_LEFT)
+		{
+			loadImg("Enemy/3_Left.png", des);
+		}
+		else if (status == WALK_RIGHT)
+		{
+			loadImg("Enemy/3_Right.png", des);
+		}
+		else if (status == WALK_UP)
+		{
+			loadImg("Enemy/3_Up.png", des);
+		}
+		else if (status == WALK_DOWN)
+		{
+			loadImg("Enemy/3_Down.png", des);
+		}
+		else if (status == DEAD)
+		{
+			loadImg("Enemy/3_Dead.png", des);
+		}
+		break;
 	}
 
 	width_frame = rect.w;
@@ -307,7 +347,9 @@ bool Enemy::checkToMap(Player& pPlayer, Map& main_map_)
 	x_pos += x_val;
 	y_pos += y_val;
 
-	if (!isCollideExplosion(main_map_))
+	is_coll = isCollideExplosion(main_map_);
+
+	if (!is_coll)
 	{
 		return isCollideCell(main_map_);
 	}
@@ -366,15 +408,17 @@ bool Enemy::isCollideCell(Map& main_map_)
 		if (check_main_top_right || check_main_bot_right)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * CELL_SIZE;
-			int head_lag_part = (y1 + 1) * CELL_SIZE - y_pos;
+			int head_lag_part = (y1 + 1) * CELL_SIZE - real_y_pos;
 			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
-				&& check_main_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_CELL)
+				&& check_main_bot_right && main_map_.tile_map[y2 - 1][x1 + 1] == BLANK_CELL
+				&& type == 2)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
 				int y3 = y_pos / CELL_SIZE;
 			}
 			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
-				&& check_main_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_CELL)
+				&& check_main_top_right && main_map_.tile_map[y1 + 1][x1 + 1] == BLANK_CELL
+				&& type == 2)
 			{
 				y_pos += head_lag_part + ERROR_NUM;
 			}
@@ -392,14 +436,16 @@ bool Enemy::isCollideCell(Map& main_map_)
 		if (check_main_top_left || check_main_bot_left)
 		{
 			int foot_lag_part = y_pos + height_frame - (y1 + 1) * CELL_SIZE;
-			int head_lag_part = (y1 + 1) * CELL_SIZE - y_pos;
+			int head_lag_part = (y1 + 1) * CELL_SIZE - real_y_pos;
 			if (foot_lag_part <= LIMIT_LAG && foot_lag_part >= 0
-				&& check_main_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_CELL)
+				&& check_main_bot_left && main_map_.tile_map[y2 - 1][x2 - 1] == BLANK_CELL
+				&& type == 2)
 			{
 				y_pos -= foot_lag_part + ERROR_NUM;
 			}
 			else if (head_lag_part <= LIMIT_LAG && head_lag_part > 0
-				&& check_main_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_CELL)
+				&& check_main_top_left && main_map_.tile_map[y1 + 1][x2 - 1] == BLANK_CELL
+				&& type == 2)
 			{
 				y_pos += head_lag_part + ERROR_NUM;
 			}
@@ -419,12 +465,14 @@ bool Enemy::isCollideCell(Map& main_map_)
 			int foot_right_lag_part = x_pos + width_frame - (x1 + 1) * CELL_SIZE;
 			int foot_left_lag_part = (x1 + 1) * CELL_SIZE - x_pos;
 			if (foot_left_lag_part <= LIMIT_LAG && foot_left_lag_part >= 0
-				&& check_main_bot_left && main_map_.tile_map[y1 + 1][x2] == BLANK_CELL)
+				&& check_main_bot_left && main_map_.tile_map[y1 + 1][x2] == BLANK_CELL
+				&& type == 2)
 			{
 				x_pos += foot_left_lag_part + ERROR_NUM;
 			}
 			else if (foot_right_lag_part <= LIMIT_LAG && foot_right_lag_part > 0
-				&& check_main_bot_right && main_map_.tile_map[y1 + 1][x1] == BLANK_CELL)
+				&& check_main_bot_right && main_map_.tile_map[y1 + 1][x1] == BLANK_CELL
+				&& type == 2)
 			{
 				x_pos -= foot_right_lag_part + ERROR_NUM;
 			}
@@ -445,12 +493,14 @@ bool Enemy::isCollideCell(Map& main_map_)
 			int head_right_lag_part = x_pos + width_frame - (x1 + 1) * CELL_SIZE;
 			int head_left_lag_part = (x1 + 1) * CELL_SIZE - x_pos;
 			if (head_left_lag_part <= LIMIT_LAG && head_left_lag_part >= 0
-				&& check_main_top_left && main_map_.tile_map[y2 - 1][x2] == BLANK_CELL)
+				&& check_main_top_left && main_map_.tile_map[y2 - 1][x2] == BLANK_CELL
+				&& type == 2)
 			{
 				x_pos += head_left_lag_part + ERROR_NUM;
 			}
 			else if (head_right_lag_part <= LIMIT_LAG && head_right_lag_part > 0
-				&& check_main_top_right && main_map_.tile_map[y2 - 1][x1] == BLANK_CELL)
+				&& check_main_top_right && main_map_.tile_map[y2 - 1][x1] == BLANK_CELL
+				&& type == 2)
 			{
 				x_pos -= head_right_lag_part + ERROR_NUM;
 			}
@@ -476,11 +526,11 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 
 	//Check for collision of enemies and bomb
 
-	x1 = (x_pos + 3*ERROR_NUM) / CELL_SIZE;
-	x2 = (x_pos + width_frame - 3*ERROR_NUM) / CELL_SIZE;
+	x1 = (x_pos + ERROR_NUM) / CELL_SIZE;
+	x2 = (x_pos + width_frame - ERROR_NUM) / CELL_SIZE;
 
-	y1 = (y_pos + 3*ERROR_NUM) / CELL_SIZE;
-	y2 = (y_pos + height_frame - 3*ERROR_NUM) / CELL_SIZE;
+	y1 = (y_pos + ERROR_NUM) / CELL_SIZE;
+	y2 = (y_pos + height_frame - ERROR_NUM) / CELL_SIZE;
 
 	int main_top_right = main_map_.tile_map[y1][x2];
 	int main_bot_right = main_map_.tile_map[y2][x2];
@@ -495,7 +545,14 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 	if (check_main_top_right || check_main_top_left || check_main_bot_right || check_main_bot_left)
 	{
 		freeze_time = SDL_GetTicks() + FREEZE_TIMER;
-		is_freeze = true;
+		if (!is_coll)
+		{
+			enemy_life[type]--;
+		}
+		if (enemy_life[type] == 0)
+		{
+			is_freeze = true;
+		}
 		return true;
 	}
 

@@ -39,7 +39,7 @@ public:
 
 
 	void increaseBombPower() { bomb_power++; }
-	void increaseBombLimit() { bomb_limit++; }
+	void increaseNumBomb() { num_bomb++; }
 	void increasePlayerSpeed() { player_speed += 0.75; }
 	void increasePoint(const int& point_plus) { point += point_plus; }
 	void decreaseLife();
@@ -48,8 +48,8 @@ public:
 	void setClip();
 	void setSpawn(const float& x_, const float& y_);
 
-	int getLifesRemain() const { return life; }
 	int getPoint() const { return point; }
+	int getLife() const { return life; }
 	float getXPos() const { return x_pos; }
 	float getYPos() const { return y_pos; }
 	float getWidthFrame() const { return width_frame; }
@@ -62,7 +62,7 @@ public:
 private:
 	int point;
 	int life;
-	int bomb_limit;
+	int num_bomb;
 	int bomb_power;
 	float player_speed;
 
@@ -84,7 +84,7 @@ private:
 	bool limit_coll;
 
 	Input input_type;
-	SDL_TimerID time_protect;
+	Uint32 time_protect;
 	SDL_Rect frame_clip[PLAYER_FRAMES];
 	std::vector<Bomb*> pbomb_list;
 };

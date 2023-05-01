@@ -18,6 +18,7 @@
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
+static TTF_Font* gFont = NULL;
 
 
 //Others

@@ -7,8 +7,11 @@
 #include "Enemy.h"
 #include "Text.h"
 
-enum GameState {MENU, PLAYING, HELP, EXIT};
+enum GameState {MENU, PLAYING, /*HIGH_SCORE,*/ HELP, EXIT, GAME_OVER};
 GameState gameState = MENU;
+
+const UINT32 TIMER_BREAK = 2000;
+const UINT32 TIMER_RESULT = 10000;
 
 bool InitWindow()
 {
@@ -57,9 +60,8 @@ GameMap InitGameMap(const int& type)
 	return game_map_;
 }
 
-Player InitPlayer(const int& type)
+void InitPlayer(Player& player_, const int& type)
 {
-	Player player_;
 
 	std::string name_player = "Player/Game_";
 	char number_game = type + '0';
@@ -73,8 +75,6 @@ Player InitPlayer(const int& type)
 	fclose(fp);
 
 	player_.setSpawn(x, y);
-
-	return player_;
 }
 
 void Close()
@@ -85,6 +85,10 @@ void Close()
 	SDL_DestroyWindow(gWindow);
 	gWindow = NULL;
 
+	TTF_CloseFont(gFont);
+	gFont = NULL;
+
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -170,19 +174,6 @@ void renderMenu()
 		{
 			button[i].Render(gScreen);
 		}
-
-		//SDL_SetRenderDrawBlendMode(gScreen, SDL_BLENDMODE_BLEND);
-
-		//// Create a semi-transparent black color with an alpha value of 128
-		//SDL_Color semiTransparentBlack = { 0, 0, 0, 150 };
-
-		//// Set the drawing color to the semi-transparent black color
-		//SDL_SetRenderDrawColor(gScreen, semiTransparentBlack.r, semiTransparentBlack.g,
-		//	semiTransparentBlack.b, semiTransparentBlack.a);
-
-		//// Draw a rectangle with the semi-transparent black color
-		//SDL_Rect rect = { 0, 0, CELL_SIZE * MAX_MAP_X, CELL_SIZE * MAX_MAP_Y };
-		//SDL_RenderFillRect(gScreen, &rect);
 
 		while (SDL_PollEvent(&gEvent))
 		{
@@ -302,15 +293,14 @@ void renderHelp()
 
 bool pause()
 {
-
 	const int kMenuButton = 2;
 
 	SDL_Rect posButton[kMenuButton];
 
-	posButton[0].x = 6 * CELL_SIZE;  //new game
+	posButton[0].x = 6 * CELL_SIZE;  //Menu
 	posButton[0].y = 350;
 
-	posButton[1].x = 12 * CELL_SIZE;  //help
+	posButton[1].x = 12 * CELL_SIZE;  //Resume
 	posButton[1].y = 350;
 
 	std::string button_path[kMenuButton];
@@ -331,7 +321,6 @@ bool pause()
 		button[i].setRect(posButton[i].x, posButton[i].y);
 	}
 
-	TTF_Font* gFont = NULL;
 	gFont = TTF_OpenFont("Font/ariblk.ttf", 20);
 	Text warning;
 	warning.setColor(Text::RED_TEXT);
@@ -344,7 +333,6 @@ bool pause()
 
 	int xm = 0;
 	int ym = 0;
-	SDL_Event m_event;
 	bool quit = false;
 	while (!quit)
 	{
@@ -412,172 +400,255 @@ bool pause()
 	}
 }
 
-void loopGame()
+void renderResult(const Uint32& time_play)
 {
-	Timer fps_time;
-	Timer playing_time;
-	GameMap gGameMap = InitGameMap(1);
-	Map gMainMap = gGameMap.getMainMap();
-	Map gItemMap = gGameMap.getItemMap();
-	Player pPlayer = InitPlayer(1);
-	std::vector<Enemy*> ListEnemy = InitEnemy(1);
+	Timer render_result_time;
+	render_result_time.Start();
+	BaseObject result_table;
 
-	BaseObject pause_button;
-	pause_button.loadImg("Menu/pause.png", gScreen);
-	pause_button.setRect(18.5 * CELL_SIZE, 0.15 * CELL_SIZE);
+	std::string str_time = "Time: ";
+	//std::string str_mark = "Mark: ";
 
-	TTF_Font* gFont = NULL;
-	gFont = TTF_OpenFont("Font/ariblk.ttf", 20);
-	Text time_game;
-	time_game.setColor(Text::YELLOW_TEXT);
-	Text mark_game;
-	mark_game.setColor(Text::YELLOW_TEXT);
+	std::string str_val;
+	int min = time_play / 60;
+	str_val = std::to_string(min);
+	str_time += str_val + "\' ";
+	int sec = time_play % 60;
+	str_val = std::to_string(sec);
+	str_time += str_val + "\'\'";
 
-	playing_time.Start();
-	bool is_pause = false;
-	bool quit = false;
-	int xm = 0;
-	int ym = 0;
-	while (!quit)
+	gFont = TTF_OpenFont("Font/ariblk.ttf", 30);
+	Text result_time;
+	result_time.setColor(Text::RED_TEXT);
+	result_time.setText(str_time);
+	result_time.loadFromRenderText(gFont, gScreen);
+
+	if (time_play > 120)
 	{
-		fps_time.Start();
+		result_table.loadImg("Menu/1_star.png", gScreen);
+	}
+	else if (time_play > 60)
+	{
+		result_table.loadImg("Menu/2_star.png", gScreen);
+	}
+	else
+	{
+		result_table.loadImg("Menu/3_star.png", gScreen);
+	}
+	result_table.setRect(0, 0);
 
+	while (render_result_time.GetTicks() <= TIMER_RESULT)
+	{
 		while (SDL_PollEvent(&gEvent))
 		{
 			switch (gEvent.type)
 			{
 			case SDL_QUIT:
-				quit = true;
 				gameState = EXIT;
+				return;
 				break;
+			}
+		}
+		SDL_RenderClear(gScreen);
+		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, 255, 255);
+		result_table.Render(gScreen);
 
-			case SDL_MOUSEMOTION:
-				xm = gEvent.motion.x;
-				ym = gEvent.motion.y;
+		result_time.renderText(gScreen, 8 * CELL_SIZE, 5.5 * CELL_SIZE);
+		SDL_RenderPresent(gScreen);
+	}
+}
 
-				if (SDLCommonFunc::isFocusWithRect(xm, ym, pause_button.getRect()))
+void loopGame()
+{
+	bool game_over = false;
+	int round = 3;
+	Player pPlayer;
+	while (round <= 3 && !game_over)
+	{
+		Timer fps_time;
+		Timer playing_time;
+		Timer break_time;
+
+		GameMap gGameMap = InitGameMap(round);
+		Map gMainMap = gGameMap.getMainMap();
+		Map gItemMap = gGameMap.getItemMap();
+		InitPlayer(pPlayer, round);
+		std::vector<Enemy*> ListEnemy = InitEnemy(round);
+
+		BaseObject pause_button;
+		pause_button.loadImg("Menu/pause.png", gScreen);
+		pause_button.setRect(18.5 * CELL_SIZE, 0.15 * CELL_SIZE);
+
+		TTF_Font* gFont = NULL;
+		gFont = TTF_OpenFont("Font/ariblk.ttf", 20);
+		Text time_game;
+		time_game.setColor(Text::YELLOW_TEXT);
+		Text mark_game;
+		mark_game.setColor(Text::YELLOW_TEXT);
+
+		playing_time.Start();
+		bool is_pause = false;
+		bool quit = false;
+		int xm = 0;
+		int ym = 0;
+		while (!quit)
+		{
+			fps_time.Start();
+
+			while (SDL_PollEvent(&gEvent))
+			{
+				switch (gEvent.type)
 				{
-					pause_button.loadImg("Menu/pause2.png", gScreen);
+				case SDL_QUIT:
+					quit = true;
+					gameState = EXIT;
+					return;
+					break;
+
+				case SDL_MOUSEMOTION:
+					xm = gEvent.motion.x;
+					ym = gEvent.motion.y;
+
+					if (SDLCommonFunc::isFocusWithRect(xm, ym, pause_button.getRect()))
+					{
+						pause_button.loadImg("Menu/pause2.png", gScreen);
+					}
+					else
+					{
+						pause_button.loadImg("Menu/pause.png", gScreen);
+					}
+					break;
+
+				case SDL_MOUSEBUTTONDOWN:
+					xm = gEvent.button.x;
+					ym = gEvent.button.y;
+
+
+					if (SDLCommonFunc::isFocusWithRect(xm, ym, pause_button.getRect()))
+					{
+						is_pause = true;
+						playing_time.Paused();
+					}
+					break;
+				}
+				if (!game_over)
+				{
+					pPlayer.handleInputAction(gEvent, gScreen, gMainMap);
+				}
+			}
+
+			while (is_pause)
+			{
+				is_pause = pause();
+			}
+			playing_time.Resume();
+			if (gameState != PLAYING)
+			{
+				break;
+			}
+
+			SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
+			SDL_RenderClear(gScreen);
+
+			int remain_time = 180 - (playing_time.GetTicks() / 1000);
+			Uint32 mark_val = pPlayer.getPoint();
+
+			gGameMap.drawMap(gScreen);
+			gGameMap.updateItemMap(gItemMap);
+			gGameMap.updateMainMap(gMainMap);
+
+			pause_button.Render(gScreen);
+
+			pPlayer.showBomb(gScreen, gMainMap, gItemMap);
+			pPlayer.showLife(gScreen);
+			pPlayer.handleMove(gMainMap, gItemMap);
+
+			for (int i = 0; i < ListEnemy.size(); i++)
+			{
+				Uint32 current_time = SDL_GetTicks();
+				if (ListEnemy[i]->isDead() && current_time >= ListEnemy[i]->getTimeDead())
+				{
+					int plus_point = ListEnemy[i]->getTypeEnemy() * 100;
+					pPlayer.increasePoint(plus_point);
+					ListEnemy[i]->Free();
+					ListEnemy[i] = NULL;
+					delete(ListEnemy[i]);
+					ListEnemy.erase(ListEnemy.begin() + i);
 				}
 				else
 				{
-					pause_button.loadImg("Menu/pause.png", gScreen);
+					if (remain_time == 30)
+					{
+						ListEnemy[i]->increaseEnemySpeed();
+					}
+					ListEnemy[i]->handleMove(pPlayer, gMainMap);
+					ListEnemy[i]->showEnemy(gScreen);
+					if (!ListEnemy[i]->isFreeze())
+					{
+						pPlayer.checkCollideEnemy(ListEnemy[i]->getRect());
+					}
 				}
-				break;
-
-			case SDL_MOUSEBUTTONDOWN:
-				xm = gEvent.button.x;
-				ym = gEvent.button.y;
-
-
-				if (SDLCommonFunc::isFocusWithRect(xm, ym, pause_button.getRect()))
-				{
-					is_pause = true;
-					playing_time.Paused();
-				}
-				break;
 			}
-			pPlayer.handleInputAction(gEvent, gScreen, gMainMap);
-		}
 
-		while (is_pause)
-		{
-			is_pause = pause();
-		}
-		playing_time.Resume();
-		if (gameState != PLAYING)
-		{
-			break;
-		}
+			pPlayer.showPlayer(gScreen);
 
-		SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
-		SDL_RenderClear(gScreen);
+			std::string str_mark = "MARK: ";
+			std::string str_val = std::to_string(mark_val);
+			str_mark += str_val;
 
-		Uint32 remain_time = 180 - (playing_time.GetTicks() / 1000);
-		Uint32 point_val = pPlayer.getPoint();
+			mark_game.setText(str_mark);
+			mark_game.loadFromRenderText(gFont, gScreen);
+			mark_game.renderText(gScreen, 8.5 * CELL_SIZE, 0.25 * CELL_SIZE);
 
-		gGameMap.drawMap(gScreen);
-		gGameMap.updateItemMap(gItemMap);
-		gGameMap.updateMainMap(gMainMap);
+			std::string str_time = "TIME: ";
 
-		pause_button.Render(gScreen);
-
-		pPlayer.showBomb(gScreen, gMainMap, gItemMap);
-		pPlayer.showLife(gScreen);
-		pPlayer.handleMove(gMainMap, gItemMap);
-
-		for (int i = 0; i < ListEnemy.size(); i++)
-		{
-			SDL_TimerID current_time = SDL_GetTicks();
-			if (ListEnemy[i]->isDead() && current_time >= ListEnemy[i]->getTimeDead())
+			if (remain_time > 0)
 			{
-				int plus_point = ListEnemy[i]->getTypeEnemy() * 100;
-				pPlayer.increasePoint(plus_point);
-				ListEnemy[i]->Free();
-				ListEnemy[i] = NULL;
-				delete(ListEnemy[i]);
-				ListEnemy.erase(ListEnemy.begin() + i);
+				std::string str_val = std::to_string(remain_time);
+				str_time += str_val;
+
+				time_game.setText(str_time);
+				time_game.loadFromRenderText(gFont, gScreen);
+				time_game.renderText(gScreen, 15 * CELL_SIZE, 0.25 * CELL_SIZE);
 			}
-			else
+
+			SDL_RenderPresent(gScreen);
+
+			int currentTime = fps_time.GetTicks();
+			int oneFrameTime = 1000 / FRAME_PER_SECOND;
+			if (currentTime < oneFrameTime)
 			{
-				if (remain_time == 30)
+				int delayTime = oneFrameTime - currentTime;
+				if (delayTime >= 0)
+					SDL_Delay(delayTime);
+			}
+
+			if (remain_time <= 0 || pPlayer.getLife() <= 0)
+			{
+				if (!game_over)
 				{
-					ListEnemy[i]->increaseEnemySpeed();
+					ListEnemy.clear();
+					game_over = true;
+					break_time.Start();
+					
 				}
-				ListEnemy[i]->handleMove(pPlayer, gMainMap);
-				ListEnemy[i]->showEnemy(gScreen);
-				if (!ListEnemy[i]->isFreeze())
+				else if (break_time.GetTicks() >= TIMER_BREAK )
 				{
-					pPlayer.checkCollideEnemy(ListEnemy[i]->getRect());
+					quit = true;
+					gameState = EXIT;
+					return;
+					break;
 				}
 			}
-			SDL_RemoveTimer(current_time);
+
+			if (ListEnemy.empty() && !game_over) {
+				quit = true;
+			}
+
+			//if (round == 1) { ListEnemy.clear(); }
 		}
-
-		pPlayer.showPlayer(gScreen);
-
-		std::string str_mark = "MARK: ";
-		std::string str_val = std::to_string(point_val);
-		str_mark += str_val;
-
-		mark_game.setText(str_mark);
-		mark_game.loadFromRenderText(gFont, gScreen);
-		mark_game.renderText(gScreen, 8.5 * CELL_SIZE, 0.25 * CELL_SIZE);
-
-		std::string str_time = "TIME: ";
-
-		if (remain_time <= 0)
-		{
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
-			gameState = EXIT;
-			break;
-		}
-		else
-		{
-			std::string str_val = std::to_string(remain_time);
-			str_time += str_val;
-
-			time_game.setText(str_time);
-			time_game.loadFromRenderText(gFont, gScreen);
-			time_game.renderText(gScreen, 15 * CELL_SIZE, 0.25 * CELL_SIZE);
-		}
-
-		SDL_RenderPresent(gScreen);
-
-		int currentTime = fps_time.GetTicks();
-		int oneFrameTime = 1000 / FRAME_PER_SECOND;
-		if (currentTime < oneFrameTime)
-		{
-			int delayTime = oneFrameTime - currentTime;
-			if (delayTime >= 0)
-				SDL_Delay(delayTime);
-		}
-
-		if (pPlayer.getLifesRemain() <= 0) {
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "Ngu !", gWindow);
-			gameState = EXIT;
-			break;
-		}
+		renderResult(playing_time.GetTicks()/1000);
+		round++;
 	}
 }
 

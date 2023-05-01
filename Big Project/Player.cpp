@@ -14,15 +14,16 @@ Player::Player()
 
 	time_protect = 0;
 
-	life = 3;
-	bomb_limit = 1;
-	bomb_power = 1;
-	player_speed = 4;
-
 	x_val = 0;
 	y_val = 0;
 	x_pos = 0;
 	y_pos = 0;
+
+	point = 0;
+	life = 3;
+	num_bomb = 1;
+	bomb_power = 1;
+	player_speed = 4;
 
 	status = WALK_NONE;
 	input_type.left = 0;
@@ -117,7 +118,7 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 
 		case SDLK_SPACE:
 		{
-			if (pbomb_list.size() < bomb_limit)
+			if (pbomb_list.size() < num_bomb)
 			{
 				int x, y;
 				x = ((x_pos + 0.5 * width_frame - ERROR_NUM) / CELL_SIZE);
@@ -142,23 +143,27 @@ void Player::handleMove(Map& main_map_, Map& item_map_)
 {
 	x_val = 0;
 	y_val = 0;
-	if (input_type.left == 1)
+
+	if (status != DEAD)
 	{
-		x_val -= player_speed;
+		if (input_type.left == 1)
+		{
+			x_val -= player_speed;
+		}
+		else if (input_type.right == 1)
+		{
+			x_val += player_speed;
+		}
+		else if (input_type.up == 1)
+		{
+			y_val -= player_speed;
+		}
+		else if (input_type.down == 1)
+		{
+			y_val += player_speed;
+		}
+		checkToMap(main_map_, item_map_);
 	}
-	else if (input_type.right == 1)
-	{
-		x_val += player_speed;
-	}
-	else if (input_type.up == 1)
-	{
-		y_val -= player_speed;
-	}
-	else if (input_type.down == 1)
-	{
-		y_val += player_speed;
-	}
-	checkToMap(main_map_, item_map_);
 }
 
 void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
@@ -257,7 +262,6 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 			if (main_map_.tile_map[y1][x] != BLANK_CELL && main_map_.tile_map[y1][x] != BLOCK_CELL && main_map_.tile_map[y1][x] != DEAD_CELL)
 			{
-				//std::cout << "bot: " << main_map_.tile_map[y1][x] << ' ';
 				main_map_.tile_map[y1][x] = BLANK_CELL;
 				break;
 			}
@@ -265,7 +269,6 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 			main_map_.tile_map[y1][x] = DEAD_CELL;
 			bomb_->setBot(i);
 		}
-		//std::cout << std::endl;
 		bomb_->setLim(false);
 	}
 	bomb_->displayExplosion(des);
@@ -323,7 +326,7 @@ void Player::showPlayer(SDL_Renderer* des)
 	SDL_Rect renderQuad = { rect.x, rect.y, width_frame, height_frame };
 	SDL_RenderCopy(des, pObject, current_clip, &renderQuad);
 
-	SDL_TimerID current_time = SDL_GetTicks();
+	Uint32 current_time = SDL_GetTicks();
 
 	if (current_time <= time_protect)
 	{
@@ -337,15 +340,13 @@ void Player::showPlayer(SDL_Renderer* des)
 		if (frame_effect > 8) { frame_effect = 1; }
 		else { frame_effect++; }
 	}
-
-	SDL_RemoveTimer(current_time);
 }
 
 void Player::showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 {
 	for (int i = 0; i < pbomb_list.size(); i++)
 	{
-		SDL_TimerID current_timer_id = SDL_GetTicks();
+		Uint32 current_timer_id = SDL_GetTicks();
 		int bomb_x = pbomb_list[i]->getX();
 		int bomb_y = pbomb_list[i]->getY();
 		if (current_timer_id >= pbomb_list[i]->getExplosionTimer())
@@ -366,7 +367,6 @@ void Player::showBomb(SDL_Renderer* des, Map& main_map_, Map& item_map_)
 		{
 			pbomb_list[i]->displayBomb(des);
 		}
-		SDL_RemoveTimer(current_timer_id);
 	}
 }
 
@@ -419,12 +419,12 @@ void Player::checkCollideEnemy(const SDL_Rect& rect_)
 {
 	float x1_pos_player = x_pos + ERROR_NUM;
 	float x2_pos_player = x_pos + width_frame - ERROR_NUM;
-	float y1_pos_player = real_y_pos + ERROR_NUM;
+	float y1_pos_player = y_pos + 0.2 * height_frame + ERROR_NUM;
 	float y2_pos_player = y_pos + height_frame - ERROR_NUM;
 
 	float x1_pos_enemy = rect_.x + ERROR_NUM;
 	float x2_pos_enemy = rect_.x + rect_.w - ERROR_NUM;
-	float y1_pos_enemy = rect_.y + 0.4*rect_.h + ERROR_NUM;
+	float y1_pos_enemy = rect_.y + 0.2 * rect_.h + ERROR_NUM;
 	float y2_pos_enemy = rect_.y + rect_.h - ERROR_NUM;
 
 	if ((x1_pos_player >= x1_pos_enemy && x1_pos_player <= x2_pos_enemy && y1_pos_player >= y1_pos_enemy && y1_pos_player <= y2_pos_enemy) ||
@@ -571,7 +571,7 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 
 	if (item_center == BOMB_UP)
 	{
-		increaseBombLimit();
+		increaseNumBomb();
 	}
 	if (item_center == POWER_UP)
 	{

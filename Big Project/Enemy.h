@@ -36,7 +36,7 @@ public:
 	float getXPos() const { return x_pos; }
 	float getYPos() const { return y_pos; }
 	int getTypeEnemy() const { return type;}
-	SDL_TimerID getTimeDead() const { return dead_time; }
+	Uint32 getTimeDead() const { return dead_time; }
 
 	void showEnemy(SDL_Renderer* des);
 	void handleMove(Player& pPLayer, Map& main_map_);
@@ -55,7 +55,8 @@ private:
 	int type;
 
 	bool is_speed_up;
-	float enemy_speed[4] = {0, 3, 3.5};
+	float enemy_speed[4] = { 0, 3, 3.5, 2 };
+	int enemy_life[4] = { 0, 1, 1, 10 };
 
 	float x_val;
 	float y_val;
@@ -73,8 +74,8 @@ private:
 	bool is_dead;
 	bool is_coll;
 
-	SDL_TimerID dead_time;
-	SDL_TimerID freeze_time;
+	Uint32 dead_time;
+	Uint32 freeze_time;
 };
 
 #endif // !ENEMY_H

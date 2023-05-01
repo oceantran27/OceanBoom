@@ -17,8 +17,8 @@ public:
 	Bomb();
 	~Bomb();
 	
-	SDL_TimerID getBombTimer() const { return timer_exist_bomb; }
-	SDL_TimerID getExplosionTimer() const { return timer_explode; }
+	Uint32 getBombTimer() const { return timer_exist_bomb; }
+	Uint32 getExplosionTimer() const { return timer_explode; }
 
 	void plantBomb( const int& xPos, const int& yPos);
 
@@ -62,8 +62,8 @@ private:
 	int height_frame;
 	SDL_Rect frame_clip[BOMB_FRAMES];
 
-	SDL_TimerID timer_exist_bomb;
-	SDL_TimerID timer_explode;
+	Uint32 timer_exist_bomb;
+	Uint32 timer_explode;
 	SDL_Renderer* screen;
 };
 

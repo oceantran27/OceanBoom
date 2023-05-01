@@ -14,8 +14,6 @@ Bomb::Bomb()
 
 Bomb::~Bomb()
 {
-	SDL_RemoveTimer(timer_exist_bomb);
-	SDL_RemoveTimer(timer_explode);
 }
 
 void Bomb::StartTimer() {
