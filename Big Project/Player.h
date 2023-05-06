@@ -41,14 +41,16 @@ public:
 	void increaseBombPower() { bomb_power++; }
 	void increaseNumBomb() { num_bomb++; }
 	void increasePlayerSpeed() { player_speed += 0.75; }
-	void increasePoint(const int& point_plus) { point += point_plus; }
+	void increasePoint(const int& point_plus) { mark += point_plus; }
 	void decreaseLife();
+	void increaseStar(const int& star_plus) { star += star_plus; }
 
 	bool loadClipImg(std::string path, SDL_Renderer* screen);
 	void setClip();
 	void setSpawn(const float& x_, const float& y_);
 
-	int getPoint() const { return point; }
+	int getStar() const { return star; }
+	int getMark() const { return mark; }
 	int getLife() const { return life; }
 	float getXPos() const { return x_pos; }
 	float getYPos() const { return y_pos; }
@@ -60,7 +62,8 @@ public:
 	void checkToMap(Map& main_map_, Map& item_map_);
 
 private:
-	int point;
+	int star;
+	int mark;
 	int life;
 	int num_bomb;
 	int bomb_power;

@@ -13,13 +13,15 @@
 #include <cmath>
 #include <ctime>
 #include <random>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 #include "BaseObject.h"
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 static TTF_Font* gFont = NULL;
-
 
 //Others
 #define ERROR_NUM 1
@@ -71,6 +73,12 @@ struct Map
 	int max_y;
 
 	int tile_map[MAX_MAP_Y][MAX_MAP_X];
+};
+
+struct HighScore 
+{
+	std::string name;
+	int star;
 };
 
 namespace SDLCommonFunc

@@ -11,6 +11,14 @@ BaseObject::BaseObject()
 
 BaseObject::~BaseObject()
 {
+	if (pObject != NULL)
+	{
+		SDL_DestroyTexture(pObject);
+		pObject = NULL;
+		rect.w = 0;
+		rect.h = 0;
+
+	}
 }
 
 bool BaseObject::loadImg(std::string path, SDL_Renderer* screen)

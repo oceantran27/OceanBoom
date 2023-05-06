@@ -289,11 +289,11 @@ void Enemy::showEnemy(SDL_Renderer* des)
 		break;
 
 	case 3:
-
+		//Display blood
 		int i = 0;
 		while (i < 10)
 		{
-			if (i < enemy_life[type])
+			if (i < (enemy_life[type] / 20) )
 			{
 				loadImg("Enemy/life_boss.png", des);
 			}
@@ -301,7 +301,7 @@ void Enemy::showEnemy(SDL_Renderer* des)
 			{
 				loadImg("Enemy/clone_life_boss.png", des);
 			}
-			SDL_Rect renderQuad_ = { (i * 10) + rect.x, rect.y - 2 * rect.h, rect.w, rect.h };
+			SDL_Rect renderQuad_ = { ((i + 1.5) * 10) + rect.x, rect.y - 2 * rect.h, rect.w, rect.h };
 			SDL_RenderCopy(des, pObject, NULL, &renderQuad_);
 			i++;
 		}
@@ -545,10 +545,7 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 	if (check_main_top_right || check_main_top_left || check_main_bot_right || check_main_bot_left)
 	{
 		freeze_time = SDL_GetTicks() + FREEZE_TIMER;
-		if (!is_coll)
-		{
 			enemy_life[type]--;
-		}
 		if (enemy_life[type] == 0)
 		{
 			is_freeze = true;

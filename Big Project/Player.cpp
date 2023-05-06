@@ -19,7 +19,8 @@ Player::Player()
 	x_pos = 0;
 	y_pos = 0;
 
-	point = 0;
+	star = 0;
+	mark = 0;
 	life = 3;
 	num_bomb = 1;
 	bomb_power = 1;

@@ -13,9 +13,10 @@ public:
 
 	enum TextColor
 	{
-		YELLOW_TEXT = 0,
-		RED_TEXT = 1,
-		BLACK_TEXT = 2
+		YELLOW_TEXT,
+		RED_TEXT,
+		BLACK_TEXT,
+		WHITE_TEXT
 	};
 
 	bool loadFromFile(std::string path);

@@ -49,6 +49,16 @@ void Text::setColor(int type)
 		SDL_Color color = { 237, 28, 36 };
 		text_color = color;
 	}
+	else if (type == BLACK_TEXT)
+	{
+		SDL_Color color = {	0, 0, 0 };
+		text_color = color;
+	}
+	else if (type == WHITE_TEXT)
+	{
+		SDL_Color color = { 255, 255, 255 };
+		text_color = color;
+	}
 }
 
 void Text::renderText(SDL_Renderer* screen,

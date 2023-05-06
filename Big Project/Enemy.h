@@ -56,7 +56,7 @@ private:
 
 	bool is_speed_up;
 	float enemy_speed[4] = { 0, 3, 3.5, 2 };
-	int enemy_life[4] = { 0, 1, 1, 10 };
+	int enemy_life[4] = { 0, 1, 1, 200 };
 
 	float x_val;
 	float y_val;
