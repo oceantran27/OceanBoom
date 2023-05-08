@@ -16,12 +16,21 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include "BaseObject.h"
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gScreen = NULL;
 static SDL_Event gEvent;
 static TTF_Font* gFont = NULL;
+
+static Mix_Chunk* mix_button = NULL;
+static Mix_Chunk* mix_start = NULL;
+static Mix_Chunk* mix_win = NULL;
+static Mix_Chunk* mix_get_name = NULL;
+static Mix_Chunk* mix_lose = NULL;
+static Mix_Chunk* mix_round_1 = NULL;
+static Mix_Chunk* mix_round_2 = NULL;
+static Mix_Chunk* mix_round_3 = NULL;
+
 
 //Others
 #define ERROR_NUM 1
@@ -55,7 +64,6 @@ const int COLOR_KEY_R = 90;
 const int COLOR_KEY_G = 182;
 const int COLOR_KEY_B = 0;
 
-
 struct Input
 {
 	int left;
@@ -83,7 +91,6 @@ struct HighScore
 
 namespace SDLCommonFunc
 {
-	int ShowMenu(SDL_Renderer* des);
 	bool isFocusWithRect(const int& x, const int& y, const SDL_Rect& rect);
 }
 

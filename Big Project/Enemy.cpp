@@ -2,10 +2,9 @@
 #include <queue>
 #include <cstring>
 
-#define LIMIT_LAG 21
+#define LIMIT_LAG 20
 
 typedef std::pair<int, int> Pair;
-
 
 //Find the shortest path between enemy and bomber
 
@@ -104,7 +103,6 @@ Pair bfs(int grid[][MAX_MAP_X], Pair src, Pair dest)
 
 Enemy::Enemy()
 {
-	//enemy_speed;
 	x_val = 0;
 	y_val = 0;
 
@@ -114,7 +112,6 @@ Enemy::Enemy()
 	width_frame = 0;
 	height_frame = 0;
 
-	//frame = 0;
 	type = -1;
 
 	is_freeze = false;
@@ -122,11 +119,18 @@ Enemy::Enemy()
 	is_speed_up = false;
 	is_coll = false;
 
+	mix_die = Mix_LoadWAV("Sound/die.wav");
+	mix_freeze = Mix_LoadWAV("Sound/monster.wav");
+
 	status = WALK_DOWN;
 }
 
 Enemy::~Enemy()
 {
+	Mix_FreeChunk(mix_die);
+	mix_die = NULL;
+	Mix_FreeChunk(mix_freeze);
+	mix_freeze = NULL;
 }
 
 void Enemy::handleMove(Player& pPlayer, Map& main_map_)
@@ -174,8 +178,8 @@ void Enemy::handleMove(Player& pPlayer, Map& main_map_)
 				int enemy_x = (x_pos + 0.5 * width_frame) / CELL_SIZE;
 				int enemy_y = (y_pos + 0.5 * height_frame) / CELL_SIZE;
 
-				int player_x = (pPlayer.getXPos() + 0.5*pPlayer.getWidthFrame()) / CELL_SIZE;
-				int player_y = (pPlayer.getYPos() + 0.5*pPlayer.getHeightFrame()) / CELL_SIZE;
+				int player_x = (pPlayer.getXPos() + 0.5 * pPlayer.getWidthFrame()) / CELL_SIZE;
+				int player_y = (pPlayer.getYPos() + 0.75 * pPlayer.getHeightFrame()) / CELL_SIZE;
 				Pair next_step = bfs(main_map_.tile_map, std::make_pair(enemy_y, enemy_x), std::make_pair(player_y, player_x));
 				if (next_step.first != -1 && next_step.second != -1)
 				{
@@ -368,6 +372,7 @@ void Enemy::checkDead(Player& pPLayer)
 
 	if ((center_player_x > x1 && center_player_x < x2 && center_player_y > y1 && center_player_y < y2))
 	{
+		Mix_PlayChannel(-1, mix_die, 0);
 		status = DEAD;
 		is_dead = true;
 		dead_time = SDL_GetTicks() + DEAD_TIMER;
@@ -521,8 +526,8 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 	int old_x_pos = x_pos - x_val;
 	int old_y_pos = y_pos - y_val;
 
-	int x1, x2;
-	int y1, y2;
+	int x1, x2, x3, x4;
+	int y1, y2, y3, y4;
 
 	//Check for collision of enemies and bomb
 
@@ -532,20 +537,41 @@ bool Enemy::isCollideExplosion(Map& main_map_)
 	y1 = (y_pos + ERROR_NUM) / CELL_SIZE;
 	y2 = (y_pos + height_frame - ERROR_NUM) / CELL_SIZE;
 
+	x3 = (x_pos + 1/3 * width_frame) / CELL_SIZE;
+	x4 = (x_pos + 2/3 * width_frame) / CELL_SIZE;
+
+	y3 = (y_pos + 1/3 * height_frame) / CELL_SIZE;
+	y4 = (y_pos + 2/3 * height_frame) / CELL_SIZE;
+
 	int main_top_right = main_map_.tile_map[y1][x2];
 	int main_bot_right = main_map_.tile_map[y2][x2];
 	int main_top_left = main_map_.tile_map[y1][x1];
 	int main_bot_left = main_map_.tile_map[y2][x1];
+
+	int main_mid_top_right = main_map_.tile_map[y3][x4];
+	int main_mid_bot_right = main_map_.tile_map[y4][x4];
+	int main_mid_top_left = main_map_.tile_map[y3][x3];
+	int main_mid_bot_left = main_map_.tile_map[y4][x3];
 
 	bool check_main_top_right = main_top_right == DEAD_CELL;
 	bool check_main_top_left = main_top_left == DEAD_CELL;
 	bool check_main_bot_right = main_bot_right == DEAD_CELL;
 	bool check_main_bot_left = main_bot_left == DEAD_CELL;
 
-	if (check_main_top_right || check_main_top_left || check_main_bot_right || check_main_bot_left)
+	bool check_main_mid_top_right = main_mid_top_right == DEAD_CELL;
+	bool check_main_mid_top_left = main_mid_top_left == DEAD_CELL;
+	bool check_main_mid_bot_right = main_mid_bot_right == DEAD_CELL;
+	bool check_main_mid_bot_left = main_mid_bot_left == DEAD_CELL;
+
+	if (check_main_top_right || check_main_top_left || check_main_bot_right || check_main_bot_left ||
+		check_main_mid_top_right || check_main_mid_top_left || check_main_mid_bot_right || check_main_mid_bot_left)
 	{
 		freeze_time = SDL_GetTicks() + FREEZE_TIMER;
 			enemy_life[type]--;
+			if (is_freeze == false)
+			{
+				Mix_PlayChannel(-1, mix_freeze, 0);
+			}
 		if (enemy_life[type] == 0)
 		{
 			is_freeze = true;

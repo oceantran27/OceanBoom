@@ -41,8 +41,6 @@ public:
 	void clearBomb(Map& main_map_, Map& item_map_);
 
 private:
-	void StartTimer();
-
 	int count;
 
 	//Limit the number of times the bomb explodes
@@ -65,6 +63,8 @@ private:
 	Uint32 timer_exist_bomb;
 	Uint32 timer_explode;
 	SDL_Renderer* screen;
+
+	void StartTimer();
 };
 
 #endif // !BOMB_H

@@ -14,11 +14,9 @@ Bomb::Bomb()
 
 Bomb::~Bomb()
 {
-}
-
-void Bomb::StartTimer() {
-	timer_exist_bomb = SDL_GetTicks() + BOMB_EXIST_TIME;
-	timer_explode = timer_exist_bomb + EXPLOSION_TIME;
+	SDL_DestroyRenderer(screen);
+	screen = NULL;
+	delete(screen);
 }
 
 bool Bomb::loadClipImg(std::string path)
@@ -132,6 +130,7 @@ void Bomb::displayExplosion(SDL_Renderer* des)
 
 void Bomb::clearBomb(Map& main_map_, Map& item_map_)
 {
+	//clear explosion
 	for (int i = max_left; i <= max_right; i++)
 	{
 		main_map_.tile_map[y][x + i] = BLANK_CELL;
@@ -152,6 +151,12 @@ void Bomb::plantBomb(const int& x_, const int& y_) {
 		y = y_;
 	}
 }
+
+void Bomb::StartTimer() {
+	timer_exist_bomb = SDL_GetTicks() + BOMB_EXIST_TIME;
+	timer_explode = timer_exist_bomb + EXPLOSION_TIME;
+}
+
 
 
 

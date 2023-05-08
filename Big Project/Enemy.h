@@ -76,6 +76,9 @@ private:
 
 	Uint32 dead_time;
 	Uint32 freeze_time;
+
+	Mix_Chunk* mix_die;
+	Mix_Chunk* mix_freeze;
 };
 
 #endif // !ENEMY_H

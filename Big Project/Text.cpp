@@ -10,7 +10,8 @@ Text::Text()
 
 Text::~Text()
 {
-	//
+	SDL_DestroyTexture(texture);
+	texture = NULL;
 }
 
 bool Text::loadFromRenderText(TTF_Font* font, SDL_Renderer* screen)

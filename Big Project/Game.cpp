@@ -13,10 +13,24 @@ GameState gameState = MENU;
 const UINT32 TIMER_BREAK = 2000;
 const UINT32 TIMER_RESULT = 10000;
 
-
-bool InitWindow()
+class Button : public BaseObject
 {
-	if (SDL_INIT_VIDEO < 0 || TTF_Init() < 0) { return false; }
+public:
+	Button() { ; };
+	~Button() { ; };
+};
+
+class Background : public BaseObject
+{
+public:
+	Background() { ; };
+	~Background() { ; };
+};
+
+
+bool Init()
+{
+	if (SDL_INIT_VIDEO < 0 || TTF_Init() < 0 || SDL_INIT_AUDIO < 0 ) { return false; }
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
 	gWindow = SDL_CreateWindow("Boom Ocean",
@@ -38,6 +52,18 @@ bool InitWindow()
 	int imgFlags = IMG_INIT_PNG;
 	if (!(IMG_Init(imgFlags) & imgFlags))
 		return false;
+
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+		return false;
+
+	mix_button = Mix_LoadWAV("Sound/button.wav");
+	mix_start = Mix_LoadWAV("Sound/start.wav");
+	mix_win = Mix_LoadWAV("Sound/win.wav");
+	mix_lose = Mix_LoadWAV("Sound/lose.wav");
+	mix_get_name = Mix_LoadWAV("Sound/get_name.wav");
+	mix_round_1 = Mix_LoadWAV("Sound/round_1.wav");
+	mix_round_2 = Mix_LoadWAV("Sound/round_2.wav");
+	mix_round_3 = Mix_LoadWAV("Sound/round_3.wav");
 
 	return true;
 }
@@ -117,6 +143,25 @@ void Close()
 	TTF_CloseFont(gFont);
 	gFont = NULL;
 
+	Mix_FreeChunk(mix_button);
+	mix_button = NULL;
+	Mix_FreeChunk(mix_start);
+	mix_start = NULL;
+	Mix_FreeChunk(mix_win);
+	mix_win = NULL;
+	Mix_FreeChunk(mix_get_name);
+	mix_get_name = NULL;
+	Mix_FreeChunk(mix_lose);
+	mix_lose = NULL;
+	Mix_FreeChunk(mix_round_1);
+	mix_round_1 = NULL;
+	Mix_FreeChunk(mix_round_2);
+	mix_round_2 = NULL;
+	Mix_FreeChunk(mix_round_3);
+	mix_round_3 = NULL;
+
+
+	Mix_Quit();
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
@@ -150,11 +195,14 @@ std::string getPlayerName()
 	Text player_name;
 	player_name.setColor(Text::BLACK_TEXT);
 
-	BaseObject background_get_name;
+	Background background_get_name;
 	background_get_name.loadImg("Menu/get_name.png", gScreen);
 	background_get_name.setRect(0, 0);
 
 	SDL_StartTextInput();
+
+	Mix_PlayChannel(-1, mix_get_name, 0);
+
 	bool quit = false;
 	while (!quit) {
 		SDL_Event event;
@@ -175,6 +223,7 @@ std::string getPlayerName()
 			case SDL_KEYDOWN:
 				if (event.key.keysym.sym == SDLK_RETURN) {
 					quit = true;
+					Mix_PlayChannel(-1, mix_button, 0);
 				}
 				else if (event.key.keysym.sym == SDLK_BACKSPACE && str_name.size() > 0) {
 					str_name.pop_back();
@@ -240,7 +289,7 @@ void renderHighScore()
 	Text player_star;
 	player_star.setColor(Text::WHITE_TEXT);
 
-	BaseObject background_high_score;
+	Background background_high_score;
 	background_high_score.loadImg("Menu/high_score.png", gScreen);
 	background_high_score.setRect(0, 0);
 
@@ -252,7 +301,7 @@ void renderHighScore()
 	std::string selected_button_path = "Menu/back2.png";
 	std::string button_path = "Menu/back.png";
 
-	BaseObject button;
+	Button button;
 	button.loadImg(button_path, gScreen);
 	button.setRect(posButton.x, posButton.y);
 
@@ -293,6 +342,7 @@ void renderHighScore()
 				{
 					gameState = MENU;
 					quit = true;
+					Mix_PlayChannel(-1, mix_button, 0);
 					return;
 				}
 				break;
@@ -324,20 +374,21 @@ void renderHighScore()
 
 void renderGameOver()
 {
-	BaseObject background_game_over;
+	Background background_game_over;
 	background_game_over.loadImg("Menu/background_game-over.png", gScreen);
 	background_game_over.setRect(0, 0);
 
 	std::string selected_button_path = "Menu/back2.png";
 	std::string button_path = "Menu/back.png";
 
-	BaseObject button; //back menu
+	Button button; //back menu
 	button.loadImg(button_path, gScreen);
 	button.setRect(825, 530); //set positon
 
 	int xm = 0;
 	int ym = 0;
 	bool quit = false;
+	Mix_PlayChannel(-1, mix_lose, 0);
 	while (!quit)
 	{
 		while (SDL_PollEvent(&gEvent))
@@ -371,6 +422,7 @@ void renderGameOver()
 				{
 					gameState = MENU;
 					quit = true;
+					Mix_PlayChannel(-1, mix_button, 0);
 				}
 				break;
 			}
@@ -435,6 +487,8 @@ void renderResult(const Uint32& time_play, Player& pPlayer)
 	}
 	result_table.setRect(0, 0);
 
+	Mix_PlayChannel(-1, mix_win, 0);
+
 	while (render_result_time.GetTicks() <= TIMER_RESULT)
 	{
 		while (SDL_PollEvent(&gEvent))
@@ -460,7 +514,7 @@ void renderResult(const Uint32& time_play, Player& pPlayer)
 
 void renderHelp()
 {
-	BaseObject background_help;
+	Background background_help;
 	background_help.loadImg("Menu/background_help.png", gScreen);
 	background_help.setRect(0, 0);
 
@@ -473,7 +527,7 @@ void renderHelp()
 	std::string button_path = "Menu/back.png";
 
 
-	BaseObject button;
+	Button button;
 	button.loadImg(button_path, gScreen);
 	button.setRect(posButton.x, posButton.y);
 
@@ -514,7 +568,9 @@ void renderHelp()
 				{
 					gameState = MENU;
 					quit = true;
+					Mix_PlayChannel(-1, mix_button, 0);
 				}
+
 				break;
 			}
 		}
@@ -528,7 +584,11 @@ void renderHelp()
 
 void renderMenu()
 {
-	BaseObject background_menu;
+	//Play music
+	Mix_Chunk* mix_menu = Mix_LoadWAV("Sound/menu.wav");
+	int channel = Mix_PlayChannel(-1, mix_menu, -1);
+
+	Background background_menu;
 	background_menu.loadImg("Menu/background.png", gScreen);
 	background_menu.setRect(0, 0);
 
@@ -562,7 +622,7 @@ void renderMenu()
 	selected_button_path[2] = "Menu/button_high-score2.png";
 	selected_button_path[3] = "Menu/button_exit2.png";
 
-	BaseObject button[kMenuButton];
+	Button button[kMenuButton];
 
 	for (int i = 0; i < kMenuButton; i++)
 	{
@@ -612,6 +672,7 @@ void renderMenu()
 					{
 						gameState = static_cast<GameState>(i + 1);
 						quit = true;
+						Mix_PlayChannel(-1, mix_button, 0);
 					}
 				}
 				break;
@@ -627,6 +688,8 @@ void renderMenu()
 		}
 		SDL_RenderPresent(gScreen);
 	}
+
+	Mix_FreeChunk(mix_menu);
 }
 
 bool pause()
@@ -651,7 +714,7 @@ bool pause()
 	selected_button_path[0] = "Menu/button_menu2.png";
 	selected_button_path[1] = "Menu/button_resume2.png";
 
-	BaseObject button[kMenuButton];
+	Button button[kMenuButton];
 
 	for (int i = 0; i < kMenuButton; i++)
 	{
@@ -662,7 +725,7 @@ bool pause()
 	gFont = TTF_OpenFont("Font/ariblk.ttf", 20);
 	Text warning;
 	warning.setColor(Text::RED_TEXT);
-	warning.setText("WARNING: The game will not be saved if you press \"Menu\".");
+	warning.setText("WARNING: Result will not be saved if you press \"Menu\".");
 	warning.loadFromRenderText(gFont, gScreen);
 
 	Text ques;
@@ -709,13 +772,9 @@ bool pause()
 				{
 					if (SDLCommonFunc::isFocusWithRect(xm, ym, button[i].getRect()))
 					{
-						switch (i)
-						{
-						case 0:
-							gameState = MENU;
-							break;
-						}
+						if (i == 0) { gameState = MENU; }
 						quit = true;
+						Mix_PlayChannel(-1, mix_button, 0);
 						return false;
 					}
 				}
@@ -743,7 +802,7 @@ bool pause()
 void loopGame()
 {
 	bool game_over = false;
-	int round = 3;
+	int round = 1;
 	Player pPlayer;
 
 	//Round loop
@@ -759,7 +818,7 @@ void loopGame()
 		InitPlayer(pPlayer, round);
 		std::vector<Enemy*> ListEnemy = InitEnemy(round);
 
-		BaseObject pause_button;
+		Button pause_button;
 		pause_button.loadImg("Menu/pause.png", gScreen);
 		pause_button.setRect(18.5 * CELL_SIZE, 0.15 * CELL_SIZE);
 
@@ -769,11 +828,29 @@ void loopGame()
 		Text mark_game;
 		mark_game.setColor(Text::YELLOW_TEXT);
 
-		playing_time.Start();
 		bool is_pause = false;
 		bool quit = false;
 		int xm = 0;
 		int ym = 0;
+
+		playing_time.Start();
+
+		Mix_PlayChannel(-1, mix_start, 0);
+		
+		//add sound
+		switch (round)
+		{
+		case 1:
+			Mix_PlayChannel(-1, mix_round_1, -1);
+			break;
+		case 2:
+			Mix_PlayChannel(-1, mix_round_2, -1);
+			break;
+		case 3:
+			Mix_PlayChannel(-1, mix_round_3, -1);
+			break;
+		}
+
 		while (!quit)
 		{
 			fps_time.Start();
@@ -784,7 +861,8 @@ void loopGame()
 				{
 				case SDL_QUIT:
 					gameState = EXIT;
-					return;
+					quit = true;
+					game_over = true;
 					break;
 
 				case SDL_MOUSEMOTION:
@@ -810,6 +888,7 @@ void loopGame()
 					{
 						is_pause = true;
 						playing_time.Paused();
+						Mix_PlayChannel(-1, mix_button, 0);
 					}
 					break;
 				}
@@ -904,6 +983,8 @@ void loopGame()
 				time_game.renderText(gScreen, 15 * CELL_SIZE, 0.25 * CELL_SIZE);
 			}
 
+			if (gameState != PLAYING) { return; }
+
 			SDL_RenderPresent(gScreen);
 
 			//manage frame
@@ -929,14 +1010,27 @@ void loopGame()
 				else if (break_time.GetTicks() >= TIMER_BREAK)
 				{
 					gameState = GAME_OVER;
-					return;
+					game_over = true;
+					quit = true;
 				}
 			}
 
 			//Win game
-			if (ListEnemy.empty() && !game_over) { break; }
+			if (ListEnemy.empty() && !game_over) { quit = true; }
+		}
 
-			if (gameState != PLAYING) { return; }
+		//remove sound
+		switch (round)
+		{
+		case 1:
+			Mix_FreeChunk(mix_round_1);
+			break;
+		case 2:
+			Mix_FreeChunk(mix_round_2);
+			break;
+		case 3:
+			Mix_FreeChunk(mix_round_3);
+			break;
 		}
 
 		//render result
@@ -946,19 +1040,19 @@ void loopGame()
 			round++;
 		}
 	}
-	//Get player's name
+	//Get player's information
 	if (!game_over && gameState == PLAYING)
 	{
 		std::string player_name = getPlayerName();
-		writeHighScore(player_name, pPlayer.getStar());
-		gameState = MENU;
+		if (player_name != "") { writeHighScore(player_name, pPlayer.getStar()); }
+		gameState = HIGH_SCORE;
 	}
 }
 
 
 int main(int argc, char* argv[])
 {
-	if (!InitWindow())
+	if (!Init())
 	{
 		return -1;
 	}

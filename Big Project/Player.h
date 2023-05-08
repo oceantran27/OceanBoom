@@ -62,6 +62,8 @@ public:
 	void checkToMap(Map& main_map_, Map& item_map_);
 
 private:
+	int limit_move_sound;
+
 	int star;
 	int mark;
 	int life;
@@ -90,6 +92,13 @@ private:
 	Uint32 time_protect;
 	SDL_Rect frame_clip[PLAYER_FRAMES];
 	std::vector<Bomb*> pbomb_list;
+
+	Mix_Chunk* mix_move;
+	Mix_Chunk* mix_plant;
+	Mix_Chunk* mix_damage;
+	Mix_Chunk* mix_die;
+	Mix_Chunk* mix_item;
+	Mix_Chunk* mix_explosion;
 };
  
 #endif // !PLAYER_H

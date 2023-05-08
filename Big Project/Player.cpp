@@ -2,6 +2,8 @@
 
 Player::Player()
 {
+	limit_move_sound = 0;
+
 	frame = 0;
 	frame_effect = 1;
 
@@ -32,12 +34,32 @@ Player::Player()
 	input_type.up = 0;
 	input_type.down = 0;
 
+	mix_move = Mix_LoadWAV("Sound/move.wav");
+	mix_plant = Mix_LoadWAV("Sound/plant.wav");
+	mix_damage = Mix_LoadWAV("Sound/damage.wav");
+	mix_die = Mix_LoadWAV("Sound/die.wav");
+	mix_item = Mix_LoadWAV("Sound/item.wav");
+	mix_explosion = Mix_LoadWAV("Sound/boom_bang.wav");
+
 }
 
 Player::~Player()
 {
 	pbomb_list.clear();
-	SDL_RemoveTimer(time_protect);
+	Mix_FreeChunk(mix_move);
+	mix_move = NULL;
+	Mix_FreeChunk(mix_plant);
+	mix_plant = NULL;
+	Mix_FreeChunk(mix_damage);
+	mix_damage = NULL;
+	Mix_FreeChunk(mix_die);
+	mix_die = NULL;
+	Mix_FreeChunk(mix_item);
+	mix_item = NULL;
+	Mix_FreeChunk(mix_explosion);
+	mix_explosion = NULL;
+
+
 }
 
 void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main_map_)
@@ -87,6 +109,12 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 		}
 		break;
 		}
+		if (limit_move_sound == 4) 
+		{ 
+			Mix_PlayChannel(-1, mix_move, 0); 
+			limit_move_sound = 0;
+		}
+		else { limit_move_sound++; }
 	}
 
 	if (event.type == SDL_KEYUP)
@@ -96,24 +124,31 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 		case SDLK_LEFT:
 		{
 			input_type.left = 0;
+			Mix_PlayChannel(-1, mix_move, 0);
 		}
 		break;
 
 		case SDLK_RIGHT:
 		{
 			input_type.right = 0;
+			Mix_PlayChannel(-1, mix_move, 0);
+
 		}
 		break;
 
 		case SDLK_UP:
 		{
 			input_type.up = 0;
+			Mix_PlayChannel(-1, mix_move, 0);
+
 		}
 		break;
 
 		case SDLK_DOWN:
 		{
 			input_type.down = 0;
+			Mix_PlayChannel(-1, mix_move, 0);
+
 		}
 		break;
 
@@ -132,6 +167,8 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 					pbomb->plantBomb(x, y);
 					pbomb_list.push_back(pbomb);
 					main_map_.tile_map[y][x] = BOMB_PLANTED;
+
+					Mix_PlayChannel(-1, mix_plant, 0);
 				}
 			}
 		}
@@ -175,6 +212,8 @@ void Player::explodeBomb(SDL_Renderer* des, Bomb* bomb_,
 
 	if (bomb_->getLim())
 	{
+		Mix_PlayChannel(-1, mix_explosion, 0);
+
 		for (int i = 0; i >= -bomb_power; i--)
 		{
 			int x1 = x + i;
@@ -420,12 +459,12 @@ void Player::checkCollideEnemy(const SDL_Rect& rect_)
 {
 	float x1_pos_player = x_pos + ERROR_NUM;
 	float x2_pos_player = x_pos + width_frame - ERROR_NUM;
-	float y1_pos_player = y_pos + 0.2 * height_frame + ERROR_NUM;
+	float y1_pos_player = y_pos + 0.35 * height_frame + ERROR_NUM;
 	float y2_pos_player = y_pos + height_frame - ERROR_NUM;
 
 	float x1_pos_enemy = rect_.x + ERROR_NUM;
 	float x2_pos_enemy = rect_.x + rect_.w - ERROR_NUM;
-	float y1_pos_enemy = rect_.y + 0.2 * rect_.h + ERROR_NUM;
+	float y1_pos_enemy = rect_.y + 0.35 * rect_.h + ERROR_NUM;
 	float y2_pos_enemy = rect_.y + rect_.h - ERROR_NUM;
 
 	if ((x1_pos_player >= x1_pos_enemy && x1_pos_player <= x2_pos_enemy && y1_pos_player >= y1_pos_enemy && y1_pos_player <= y2_pos_enemy) ||
@@ -585,6 +624,7 @@ void Player::checkToMap(Map& main_map_, Map& item_map_)
 
 	if (item_center != BLANK_ITEM)
 	{
+		Mix_PlayChannel(-1, mix_item, 0);
 		item_map_.tile_map[y_center][x_center] = BLANK_ITEM;
 	}
 
@@ -622,6 +662,10 @@ void Player::decreaseLife()
 				life--;
 				setSpawn(x_pos / CELL_SIZE, y_pos / CELL_SIZE);
 				status = DEAD;
+
+				if (life > 0) { Mix_PlayChannel(-1, mix_damage, 0); }
+				else { Mix_PlayChannel(-1, mix_die, 0); }
+
 				SDL_Delay(150);
 			}
 			limit_coll = true;
