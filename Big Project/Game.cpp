@@ -61,9 +61,6 @@ bool Init()
 	mix_win = Mix_LoadWAV("Sound/win.wav");
 	mix_lose = Mix_LoadWAV("Sound/lose.wav");
 	mix_get_name = Mix_LoadWAV("Sound/get_name.wav");
-	mix_round_1 = Mix_LoadWAV("Sound/round_1.wav");
-	mix_round_2 = Mix_LoadWAV("Sound/round_2.wav");
-	mix_round_3 = Mix_LoadWAV("Sound/round_3.wav");
 
 	return true;
 }
@@ -812,6 +809,10 @@ void loopGame()
 		Timer playing_time;
 		Timer break_time;
 
+		mix_round_1 = Mix_LoadWAV("Sound/round_1.wav");
+		mix_round_2 = Mix_LoadWAV("Sound/round_2.wav");
+		mix_round_3 = Mix_LoadWAV("Sound/round_3.wav");
+
 		GameMap gGameMap = InitGameMap(round);
 		Map gMainMap = gGameMap.getMainMap();
 		Map gItemMap = gGameMap.getItemMap();
@@ -841,7 +842,7 @@ void loopGame()
 		switch (round)
 		{
 		case 1:
-			Mix_PlayChannel(-1, mix_round_1, -1);
+			 Mix_PlayChannel(-1, mix_round_1, -1);
 			break;
 		case 2:
 			Mix_PlayChannel(-1, mix_round_2, -1);
@@ -897,13 +898,15 @@ void loopGame()
 					pPlayer.handleInputAction(gEvent, gScreen, gMainMap);
 				}
 			}
-
 			//Manage pause
-			while (is_pause)
+			if (is_pause)
 			{
-				is_pause = pause();
+				Mix_Pause(-1);
+				pause();
+				Mix_Resume(-1);
+				playing_time.Resume();
+				is_pause = false;
 			}
-			playing_time.Resume();
 
 			SDL_SetRenderDrawColor(gScreen, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B, 255);
 			SDL_RenderClear(gScreen);
@@ -983,9 +986,15 @@ void loopGame()
 				time_game.renderText(gScreen, 15 * CELL_SIZE, 0.25 * CELL_SIZE);
 			}
 
-			if (gameState != PLAYING) { return; }
-
-			SDL_RenderPresent(gScreen);
+			if (gameState != PLAYING) 
+			{ 
+				quit = true;
+				game_over = true;
+			}
+			else
+			{
+				SDL_RenderPresent(gScreen);
+			}
 
 			//manage frame
 			int currentTime = fps_time.GetTicks();
@@ -1020,21 +1029,24 @@ void loopGame()
 		}
 
 		//remove sound
-		switch (round)
+		if (mix_round_1)
 		{
-		case 1:
 			Mix_FreeChunk(mix_round_1);
-			break;
-		case 2:
+			mix_round_1 = NULL;
+		}
+		if (mix_round_2)
+		{
 			Mix_FreeChunk(mix_round_2);
-			break;
-		case 3:
+			mix_round_2 = NULL;
+		}
+		if (mix_round_3)
+		{
 			Mix_FreeChunk(mix_round_3);
-			break;
+			mix_round_3 = NULL;
 		}
 
 		//render result
-		if (!game_over)
+		if (!game_over || gameState == PLAYING)
 		{
 			renderResult(playing_time.GetTicks() / 1000, pPlayer);
 			round++;

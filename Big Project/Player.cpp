@@ -109,6 +109,7 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 		}
 		break;
 		}
+
 		if (limit_move_sound == 4) 
 		{ 
 			Mix_PlayChannel(-1, mix_move, 0); 
@@ -174,6 +175,14 @@ void Player::handleInputAction(SDL_Event& event, SDL_Renderer* screen, Map& main
 		}
 		break;
 		}
+	}
+
+	if (status == WALK_NONE)
+	{
+		input_type.left = 0;
+		input_type.right = 0;
+		input_type.up = 0;
+		input_type.down = 0;
 	}
 }
 
@@ -667,14 +676,16 @@ void Player::decreaseLife()
 				else { Mix_PlayChannel(-1, mix_die, 0); }
 
 				SDL_Delay(150);
+
+				limit_coll = true;
 			}
-			limit_coll = true;
+		}
+		else
+		{
+			limit_coll = false;
 		}
 	}
-	else
-	{
-		limit_coll = false;
-	}
+
 }
 
 void Player::showLife(SDL_Renderer* des)
