@@ -16,8 +16,8 @@ OceanBoom is an exciting game inspired by the classic Bomberman. Developed using
 - **Explosive Gameplay**: Strategically place bombs to navigate challenges and defeat monsters.
 - **Monsters**:
   - ![rock](https://github.com/oceantran27/OceanBoom/assets/89170516/9f1f7b72-f049-40d6-a317-d2619d4764c3) *Rock Monster*: Moves randomly. 
-  - ![ghost](https://github.com/oceantran27/OceanBoom/assets/89170516/24939d33-af6c-49fa-8698-7bb903e75ae5) *Ghost Monster*: Pursues the main character.
-  - ![captain](https://github.com/oceantran27/OceanBoom/assets/89170516/3e219c63-b2be-4739-82ca-d86aa927de1f) *Captain Monster (Boss)*: Formidable in size and health.
+  - ![ghost](https://github.com/oceantran27/OceanBoom/assets/89170516/24939d33-af6c-49fa-8698-7bb903e75ae5) *Ghost Monster*: Chases the main character.
+  - ![captain](https://github.com/oceantran27/OceanBoom/assets/89170516/3e219c63-b2be-4739-82ca-d86aa927de1f) *Captain Monster (Boss)*: Huge and with the most health.
 - **Special Items**:
   - ![shoes](https://github.com/oceantran27/OceanBoom/assets/89170516/88bb10db-82ef-4364-abbc-db4e798d5700) *Speed Boost Shoes*: Increase character movement speed.
   - ![water_ballon](https://github.com/oceantran27/OceanBoom/assets/89170516/e49010b7-be68-4e7f-b9ae-6df5bac590ab) *Water Balloon*: Expand the number of bombs you can deploy.
