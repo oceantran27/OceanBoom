@@ -38,12 +38,3 @@ git clone https://github.com/oceantran/oceanboom.git
 cd oceanboom
 ./GameSetup.exe
 ```
-
-## Author
-
-- **Name**: Ocean Tran
-- **Email**: daiduong3a1@gmail.com
-
-## Feedback
-
-For any feedback or suggestions, please contact us at [daiduong3a1@gmail.com](mailto:daiduong3a1@gmail.com). We appreciate your input!
